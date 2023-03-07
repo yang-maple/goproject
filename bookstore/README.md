@@ -27,7 +27,8 @@
 
 main 包是主要包，为了搞清楚各个模块之间的关系，我在这里给出了 main 包的实现逻辑图
 
-![image-20230307113246702](C:\Users\xiy19425\AppData\Roaming\Typora\typora-user-images\image-20230307113246702.png)
+![图片](https://user-images.githubusercontent.com/90596113/223327568-86164824-47fb-41da-942d-c2312d33df5e.png)
+
 
 ### 图书数据存储模块（store)
 
