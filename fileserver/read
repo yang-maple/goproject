@@ -1,0 +1,11 @@
+服务端
+
+server
+ls|0
+
+
+客户端
+ls|file:file:...
+
+
+
