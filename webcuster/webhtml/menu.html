@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<!--用于主页面-->
+<html>
+<head>
+    <title>用户信息管理系统</title>
+    <body>
+       <center><h2>欢迎登陆用户信息管理系统</h2><br><br>
+        <h4>请选择对应的功能</h4><br><br>
+        <!-- 表单提交的方法为 post  跳转的页面为 find.html-->
+        <form method="post" action="find">
+        <label for="ffind"></label>
+        <input type="submit" id="ffind" name="fsubmit" value="查看用户信息">
+        </form><br>
+         <!-- 表单提交的方法为 post  跳转的页面为 add.html-->
+        <form method="post" action="add">
+        <label for="fadd"></label>
+        <input type="submit" id="fadd" name="fsubmit" value="新增用户信息">
+        </form><br>
+        <!-- 表单提交的方法为 post  跳转的页面为 delete.html-->
+        <form method="post" action="delete">
+        <label for="fdel"></label>
+        <input type="submit" id="fdel" name="fsubmit" value="删除用户信息">
+         </form><br>
+         <!-- 表单提交的方法为 post  跳转的页面为 updata.html-->
+        <form method="post" action="updata">
+        <label for="fupdata"></label>
+        <input type="submit" id="fupdata" name="fsubmit" value="更新用户信息">
+        </form><br>
+        <form>
+        <label for="fquit"></label>
+        <input type="submit" id="fquit" name="fsubmit" value="保存用户信息">
+        </form>
+    </center>
+                
+    </body>
+</head>
+
+</html>

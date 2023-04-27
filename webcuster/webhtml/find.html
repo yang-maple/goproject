@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<!--用于 查看功能-->
+<html>
+<head>
+    <title>用户信息</title>
+
+    <body>
+        <center>
+            <h3>用户信息</h3>
+            <hr>
+        <table cellpadding="10" cellspacing="10">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>   </th>
+                    <th>Age</th>
+                    <th>   </th>
+                    <th>Phone</th>
+                    <th>   </th>
+                    <th>Emil</th>
+                    <th>   </th>
+                    <th>Addr</th>
+                </tr>
+            </thead>
+           <tbody>
+            {{ range . }}
+            <tr>
+                <td>{{ .Name }}</td>
+                <td></td>
+                <td>{{ .Age }}</td>
+                <td></td>
+                <td>{{ .Phone }}</td>
+                <td></td>
+                <td>{{ .Emil }}</td>
+                <td></td>
+                <td>{{ .Addr.City }}</td>
+            </tr>
+            {{ end }}
+           </tbody>
+        </table>
+        <br><br>
+        <form method="post" action="login">
+            <label for="fcancel"></label>
+            <input type="submit" id="fcancel" name="fsubmit" value="返回">
+        </form>
+    </center>
+    </body>
+</head>
+
+</html>
