@@ -1,0 +1,21 @@
+smtp:
+  Host: "smtp.qq.com"
+  Username: "499968985@qq.com"
+  Password: "neledrmpyyzzbjce"
+  Port: 587
+  Address: "499968985@qq.com"
+
+notice:
+  raddress: "xiongyang@noahgroup.com"
+    
+webhook:
+  url: "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=d9956c6a-1f7d-45bc-9667-2d7f42241443"
+   
+
+
+
+
+
+  #	server.Port = 587
+  #	server.Username = "499968985@qq.com"
+  #	server.Password = "neledrmpyyzzbjce"
