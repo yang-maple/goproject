@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/tools/clientcmd"
 	"log"
 )
@@ -15,24 +17,44 @@ func main() {
 	if err != nil {
 		log.Fatal("config err :", err)
 	}
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		log.Fatal("clientset err :", err)
+	//clientset, err := kubernetes.NewForConfig(config)
+	//if err != nil {
+	//	log.Fatal("clientset err :", err)
+	//}
+
+	//nodelist, err := clientset.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
+	//if err != nil {
+	//	log.Fatal("nodelist err :", err)
+	//}
+	//for _, node := range nodelist.Items {
+	//	fmt.Println(node.Name, node.Status.Addresses[0].Address)
+	//}
+
+	//namespacelist, err := clientset.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
+	//if err != nil {
+	//	log.Fatal("namespacelist err :", err)
+	//}
+	//for _, namespaces := range namespacelist.Items {
+	//	fmt.Println(namespaces.Name)
+	//}
+	//deploy, _ := clientset.AppsV1().Deployments("jenkins").Get(context.TODO(), "nginx", metav1.GetOptions{})
+	//
+	//println(deploy.Annotations["deployment.kubernetes.io/revision"])
+	client, err := dynamic.NewForConfig(config)
+	gvr := schema.GroupVersionResource{
+		Group:    "apps",
+		Version:  "v1",
+		Resource: "deployments",
 	}
-	nodelist, err := clientset.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
-	if err != nil {
-		log.Fatal("nodelist err :", err)
-	}
-	for _, node := range nodelist.Items {
-		fmt.Println(node.Name, node.Status.Addresses[0].Address)
+	deployment, err := client.Resource(gvr).Namespace("jenkins").Get(context.TODO(), "nginx", metav1.GetOptions{})
+	currentRevision := deployment.GetAnnotations()["deployment.kubernetes.io/revision"]
+	fmt.Println("current revision:", currentRevision)
+	historyRevision := "5"
+	patchData := fmt.Sprintf(`{"metadata":{"annotations":{"deployment.kubernetes.io/revision":"%s"}}}`, historyRevision)
+	if _, err = client.Resource(gvr).Namespace("jenkins").Patch(context.TODO(), "nginx", types.StrategicMergePatchType, []byte(patchData), metav1.PatchOptions{}); err != nil {
+		log.Println("Patch", err)
+		return
 	}
 
-	namespacelist, err := clientset.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
-	if err != nil {
-		log.Fatal("namespacelist err :", err)
-	}
-	for _, namespaces := range namespacelist.Items {
-		fmt.Println(namespaces.Name)
-	}
-
+	fmt.Println("rollback done")
 }
