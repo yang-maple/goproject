@@ -40,7 +40,7 @@ func (n *node) GetNodeDeTal(c *gin.Context) {
 		})
 		return
 	}
-	data, err := service.Node.GetNodeDetal(params.NodeName)
+	data, err := service.Node.GetNodeDetail(params.NodeName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"msg":  err.Error(),
