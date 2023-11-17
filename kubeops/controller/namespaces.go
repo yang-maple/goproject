@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/wonderivan/logger"
+	corev1 "k8s.io/api/core/v1"
 	"kubeops/service"
 	"net/http"
 )
@@ -107,4 +108,30 @@ func (n *namespace) CreateNs(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"msg": "创建成功",
 	})
+}
+
+func (n *namespace) UpdateNs(c *gin.Context) {
+	params := new(struct {
+		Data *corev1.Namespace `json:"data"`
+	})
+	err := c.Bind(&params)
+	if err != nil {
+		logger.Info("绑定参数失败" + err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"err": errors.New("绑定参数失败" + err.Error()),
+		})
+		return
+	}
+	err = service.Namespace.UpdateNs(params.Data)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"msg":    "更新失败",
+			"reason": errors.New(err.Error()),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"msg": "更新成功",
+	})
+
 }

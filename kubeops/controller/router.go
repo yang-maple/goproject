@@ -16,16 +16,16 @@ func (router *router) InitApiRouter(r *gin.Engine) {
 	{
 		v1.GET("/list", Pod.GetPods)
 		v1.DELETE("/delete", Pod.DeletePod)
-		v1.PUT("/update", Pod.UpdataPod)
+		v1.PUT("/update", Pod.UpdatePod)
 		v1.GET("/container/list", Pod.GetContainerList)
 		v1.GET("/detail", Pod.GetPodsDetail)
 		v1.GET("/container/log", Pod.GetContainerLog)
-		v1.GET("/ns", Pod.GetPodnumer)
+		v1.GET("/ns", Pod.GetPodNumber)
 	}
 	v2 := r.Group("/v1/api/deploy")
 	{
 		v2.GET("/list", Deployment.GetDeploylist)
-		v2.PUT("/modity", Deployment.ModifyDeployReplicas)
+		v2.PUT("/modify", Deployment.ModifyDeployReplicas)
 		v2.POST("/restart", Deployment.RestartDeploy)
 		v2.GET("/detail", Deployment.GetDeployDetail)
 		v2.POST("/create", Deployment.CreateDeploy)
@@ -34,14 +34,14 @@ func (router *router) InitApiRouter(r *gin.Engine) {
 		v2.GET("/ns", Deployment.GetDeployPer)
 		v2.POST("/rollout", Deployment.RolloutDeploy)
 	}
-	v3 := r.Group("/v1/api/daemonset")
+	v3 := r.Group("/v1/api/daemon")
 	{
 		v3.GET("/list", Daemonset.GetDaemonsetlist)
 		v3.GET("/detail", Daemonset.GetDaemonsetDetal)
 		v3.DELETE("/delete", Daemonset.DelDaemonset)
 		v3.PUT("/update", Daemonset.UpdataDaemonset)
 	}
-	v4 := r.Group("/v1/api/statefulset")
+	v4 := r.Group("/v1/api/stateful")
 	{
 		v4.GET("/list", Statefulset.GetStatefulSetList)
 		v4.GET("/detail", Statefulset.GetStatefulSetDeTal)
@@ -54,6 +54,7 @@ func (router *router) InitApiRouter(r *gin.Engine) {
 		v5.GET("/detail", Namespace.GetNsDetail)
 		v5.DELETE("/delete", Namespace.DelNs)
 		v5.POST("/create", Namespace.CreateNs)
+		v5.PUT("/update", Namespace.UpdateNs)
 	}
 	v6 := r.Group("/v1/api/node")
 	{
@@ -66,6 +67,7 @@ func (router *router) InitApiRouter(r *gin.Engine) {
 		v7.GET("/detail", Persistentvolume.GetPersistentVolumeDetail)
 		v7.DELETE("/delete", Persistentvolume.DelPersistentVolume)
 		v7.POST("/create", Persistentvolume.CreatePersistentVolume)
+		v7.PUT("/update", Persistentvolume.UpdatePersistentVolume)
 	}
 	v8 := r.Group("/v1/api/pvc")
 	{

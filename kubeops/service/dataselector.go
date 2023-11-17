@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 	"time"
@@ -101,8 +102,12 @@ func (d *dataselector) Filter() *dataselector {
 
 func (d *dataselector) Pagination() *dataselector {
 	//定义变量获取变量值
-	limit := d.DataSelect.Paginate.limit
+
 	page := d.DataSelect.Paginate.page
+	limit := d.DataSelect.Paginate.limit
+	if len(d.GenericDataList) < limit {
+		limit = len(d.GenericDataList)
+	}
 	//检验参数的合法性
 	if limit <= 0 || page <= 0 {
 		return d
@@ -115,7 +120,8 @@ func (d *dataselector) Pagination() *dataselector {
 		endindex = len(d.GenericDataList) - 1
 	}
 	// 取出在 startindex 和 endindex 直接的数据 并返回
-	d.GenericDataList = d.GenericDataList[startindex:endindex]
+	d.GenericDataList = d.GenericDataList[startindex : endindex+1]
+	fmt.Println(startindex, endindex, len(d.GenericDataList))
 	return d
 }
 

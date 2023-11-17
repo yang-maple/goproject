@@ -9,6 +9,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"kubeops/model"
 )
 
 type persistenvolume struct{}
@@ -16,8 +17,21 @@ type persistenvolume struct{}
 var Persistenvolume persistenvolume
 
 type pvlist struct {
-	Total               int                       `json:"total"`
-	Persistenvolumename []corev1.PersistentVolume `json:"persistenvolumename"`
+	Total int      `json:"total"`
+	Item  []pvinfo `json:"item"`
+}
+
+type pvinfo struct {
+	Name          string                               `json:"name"`
+	Labels        map[string]string                    `json:"labels"`
+	Capacity      corev1.ResourceList                  `json:"capacity"`
+	AccessMode    []corev1.PersistentVolumeAccessMode  `json:"access_mode"`
+	ReclaimPolicy corev1.PersistentVolumeReclaimPolicy `json:"reclaim_policy"`
+	Status        corev1.PersistentVolumeStatus        `json:"status"`
+	Claim         string                               `json:"claim"`
+	StorageClass  string                               `json:"storage_class"`
+	Reason        string                               `json:"reason"`
+	Age           string                               `json:"age"`
 }
 
 type CreatePVConfig struct {
@@ -36,13 +50,23 @@ func (p *persistenvolume) GetPvList() (*pvlist, error) {
 		logger.Info("获取PersistentVolume 失败" + err.Error())
 		return nil, errors.New("获取PersistentVolume 失败" + err.Error())
 	}
-	item := make([]corev1.PersistentVolume, 0, len(pvs.Items))
-	for i := range pvs.Items {
-		item = append(item, pvs.Items[i])
+	item := make([]pvinfo, 0, len(pvs.Items))
+	for _, pv := range pvs.Items {
+		item = append(item, pvinfo{
+			Name:          pv.Name,
+			Labels:        pv.Labels,
+			Capacity:      pv.Spec.Capacity,
+			AccessMode:    pv.Spec.AccessModes,
+			ReclaimPolicy: pv.Spec.PersistentVolumeReclaimPolicy,
+			Status:        pv.Status,
+			Claim:         getclaim(pv.Spec.ClaimRef),
+			StorageClass:  pv.Spec.StorageClassName,
+			Age:           model.GetAge(pv.CreationTimestamp.Unix()),
+		})
 	}
 	return &pvlist{
-		Total:               len(pvs.Items),
-		Persistenvolumename: item,
+		Total: len(pvs.Items),
+		Item:  item,
 	}, nil
 }
 
@@ -108,4 +132,22 @@ func (p *persistenvolume) CreatePv(data *CreatePVConfig) (err error) {
 		return errors.New("创建 PersistentVolume 失败" + err.Error())
 	}
 	return nil
+}
+
+// UpdatePv 更新 PersistentVolume
+func (p *persistenvolume) UpdatePv(deploy *corev1.PersistentVolume) (err error) {
+	_, err = K8s.Clientset.CoreV1().PersistentVolumes().Update(context.TODO(), deploy, metav1.UpdateOptions{})
+	if err != nil {
+		logger.Info("PersistentVolume 更新失败" + err.Error())
+		return errors.New("PersistentVolume 更新失败" + err.Error())
+	}
+	return nil
+}
+
+// 获取 claim 参数
+func getclaim(claimref *corev1.ObjectReference) string {
+	if claimref != nil {
+		return claimref.Namespace + "/" + claimref.Name
+	}
+	return ""
 }

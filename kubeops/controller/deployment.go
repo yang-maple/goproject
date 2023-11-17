@@ -2,6 +2,7 @@ package controller
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/wonderivan/logger"
 	appsv1 "k8s.io/api/apps/v1"
@@ -55,9 +56,9 @@ func (d *deployment) GetDeploylist(c *gin.Context) {
 // ModifyDeployReplicas 修改副本数
 func (d *deployment) ModifyDeployReplicas(c *gin.Context) {
 	params := new(struct {
-		DeployName string `form:"deploy_name"`
-		Namespace  string `form:"namespace"`
-		Replicas   int    `form:"replicas"`
+		DeployName string `json:"deploy_name"`
+		Namespace  string `json:"namespace"`
+		Replicas   int    `json:"replicas"`
 	})
 
 	err := c.Bind(&params)
@@ -83,8 +84,8 @@ func (d *deployment) ModifyDeployReplicas(c *gin.Context) {
 // RestartDeploy 重启 deployment
 func (d *deployment) RestartDeploy(c *gin.Context) {
 	params := new(struct {
-		DeployName string `form:"deploy_name"`
-		Namespace  string `form:"namespace"`
+		DeployName string `json:"deploy_name"`
+		Namespace  string `json:"namespace"`
 	})
 
 	err := c.Bind(&params)
@@ -135,7 +136,10 @@ func (d *deployment) GetDeployDetail(c *gin.Context) {
 
 // CreateDeploy 创建 deploy 实例
 func (d *deployment) CreateDeploy(c *gin.Context) {
-	params := new(service.DeploymentCreate)
+	params := new(struct {
+		Data *service.DeploymentCreate `json:"data"`
+	})
+	fmt.Println("接受参数")
 	err := c.ShouldBindJSON(&params)
 	if err != nil {
 		logger.Info("绑定参数失败" + err.Error())
@@ -144,12 +148,11 @@ func (d *deployment) CreateDeploy(c *gin.Context) {
 		})
 		return
 	}
-	err = service.Deployment.CreateDeploy(params)
+	err = service.Deployment.CreateDeploy(params.Data)
 	if err != nil {
-		logger.Info("创建失败" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"msg": "创建失败",
-			"err": errors.New(err.Error()),
+			"msg":    "创建失败",
+			"reason": errors.New(err.Error()),
 		})
 		return
 	}
@@ -176,7 +179,8 @@ func (d *deployment) DelDeploy(c *gin.Context) {
 	err = service.Deployment.DelDeploy(params.Namespace, params.DeployName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"err": errors.New("删除失败" + err.Error()),
+			"msg":    "删除失败",
+			"reason": errors.New(err.Error()),
 		})
 		return
 	} else {
@@ -205,10 +209,9 @@ func (d *deployment) UpdateDeploy(c *gin.Context) {
 	}
 	err = service.Deployment.UpdateDeploy(params.Namespace, params.Data)
 	if err != nil {
-		logger.Info("更新失败" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
-			"msg": "更新失败",
-			"err": errors.New(err.Error()),
+			"msg":    "更新失败",
+			"reason": errors.New(err.Error()),
 		})
 		return
 	}

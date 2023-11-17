@@ -1,8 +1,10 @@
 package controller
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/wonderivan/logger"
+	corev1 "k8s.io/api/core/v1"
 	"kubeops/service"
 	"net/http"
 )
@@ -15,7 +17,6 @@ var Persistentvolume persistenvolume
 func (p *persistenvolume) GetPersistentVolumeList(c *gin.Context) {
 	data, err := service.Persistenvolume.GetPvList()
 	if err != nil {
-		logger.Info("获取 PersistentVolume 失败" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"msg":  "获取PersistentVolume失败",
 			"data": nil,
@@ -44,7 +45,6 @@ func (p *persistenvolume) GetPersistentVolumeDetail(c *gin.Context) {
 	}
 	data, err := service.Persistenvolume.GetPvDetail(params.PersistentVolumeName)
 	if err != nil {
-		logger.Info("获取 PersistentVolume 失败" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"msg":  "获取PersistentVolume失败",
 			"data": nil,
@@ -74,7 +74,6 @@ func (p *persistenvolume) DelPersistentVolume(c *gin.Context) {
 	}
 	err = service.Persistenvolume.DelPv(params.PersistentVolumeName)
 	if err != nil {
-		logger.Info("删除 PersistentVolume 失败" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"msg":  "删除 PersistentVolume 失败",
 			"data": nil,
@@ -100,7 +99,6 @@ func (p *persistenvolume) CreatePersistentVolume(c *gin.Context) {
 	}
 	err = service.Persistenvolume.CreatePv(data)
 	if err != nil {
-		logger.Info("创建 PersistentVolume 失败" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"msg":  "创建PersistentVolume失败",
 			"data": nil,
@@ -111,4 +109,31 @@ func (p *persistenvolume) CreatePersistentVolume(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"msg": "创建成功",
 	})
+}
+
+// UpdatePersistentVolume 更新PersistentVolume 资源
+func (p *persistenvolume) UpdatePersistentVolume(c *gin.Context) {
+	params := new(struct {
+		Data *corev1.PersistentVolume `json:"data"`
+	})
+	err := c.Bind(&params)
+	if err != nil {
+		logger.Info("绑定参数失败" + err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"err": errors.New("绑定参数失败" + err.Error()),
+		})
+		return
+	}
+	err = service.Persistenvolume.UpdatePv(params.Data)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"msg":    "更新失败",
+			"reason": errors.New(err.Error()),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"msg": "更新成功",
+	})
+
 }

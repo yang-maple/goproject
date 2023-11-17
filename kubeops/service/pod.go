@@ -5,12 +5,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
-	"kubeops/config"
-
 	"github.com/wonderivan/logger"
+	"io"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"kubeops/config"
+	"kubeops/model"
 )
 
 var Pod pod
@@ -23,44 +23,57 @@ type Podnp struct {
 }
 
 //类型转换的两个方法
-// corev1.pod --> Datacell
+// core1.pod --> Data cell
 
 func (p *pod) toCells(pods []corev1.Pod) []DataCell {
 	// 定义并初始化 []DataCell 数组
 	cells := make([]DataCell, len(pods))
-	//数据转换，将pods类型转化为datacells 类型
+	//数据转换，将pods类型转化为data-cells 类型
 	for i := range pods {
 		cells[i] = podCell(pods[i])
 	}
 	return cells
 }
 
-// Datacell --> corev1.pod
+// Data cell --> core1.pod
 func (p *pod) fromCells(cells []DataCell) []corev1.Pod {
 
 	pods := make([]corev1.Pod, len(cells))
 	for i := range cells {
-		//先断言判断是否为 podcell 然后进行转换
+		//先断言判断是否为 pod cell 然后进行转换
 		pods[i] = corev1.Pod(cells[i].(podCell))
 	}
 	return pods
 }
 
 type PodResp struct {
-	Total int          `json:"total"`
-	Item  []corev1.Pod `json:"item"`
+	Total int       `json:"total"`
+	Item  []podInfo `json:"item"`
 }
 
-// 定义 getpod 方法获取pod 列表 支持过滤排序和分页
+type podInfo struct {
+	Name      string            `json:"name"`
+	Namespace string            `json:"namespace"`
+	Image     []string          `json:"image"`
+	Labels    map[string]string `json:"labels"`
+	Node      string            `json:"node"`
+	Status    corev1.PodPhase   `json:"status"`
+	Restart   int32             `json:"restart"`
+	Cpu       string            `json:"cpu"`
+	Memory    string            `json:"memory"`
+	Age       string            `json:"age"`
+}
+
+// GetPods 定义 get pod 方法获取pod 列表 支持过滤排序和分页
 func (p *pod) GetPods(FilterName, NameSpaces string, Limit, Page int) (PR *PodResp, err error) {
-	//获取postlist
-	Postlist, err := K8s.Clientset.CoreV1().Pods(NameSpaces).List(context.TODO(), metav1.ListOptions{})
+	//获取post-list
+	postList, err := K8s.Clientset.CoreV1().Pods(NameSpaces).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		logger.Info("获取postlist 失败" + err.Error())
+		logger.Info("获取post-list 失败" + err.Error())
 	}
-	//实例化dataselect对象
-	selectdata := &dataselector{
-		GenericDataList: p.toCells(Postlist.Items),
+	//实例化data select对象
+	selectData := &dataselector{
+		GenericDataList: p.toCells(postList.Items),
 		DataSelect: &DataSelectQuery{
 			Filter: &FilterQuery{FilterName},
 			Paginate: &PaginateQuery{
@@ -70,31 +83,44 @@ func (p *pod) GetPods(FilterName, NameSpaces string, Limit, Page int) (PR *PodRe
 		},
 	}
 	//先过滤 后排序
-	filtered := selectdata.Filter()
+	filtered := selectData.Filter()
 	total := len(filtered.GenericDataList)
 	//分页
-	datapage := filtered.Sort().Pagination()
-	pods := p.fromCells(datapage.GenericDataList)
+	dataPage := filtered.Sort().Pagination()
+	pods := p.fromCells(dataPage.GenericDataList)
+	items := make([]podInfo, 0, len(pods))
 	for _, v := range pods {
-		fmt.Println(v.Name, v.Namespace, v.CreationTimestamp.Time)
+		items = append(items, podInfo{
+			Name:      v.Name,
+			Namespace: v.Namespace,
+			Labels:    v.Labels,
+			Image:     model.GetImage(v.Spec),
+			Node:      v.Spec.NodeName,
+			Status:    v.Status.Phase,
+			Restart:   model.GetRestart(v.Status),
+			Cpu:       model.GetResourcesRequests("Cpu", v.Spec),
+			Memory:    model.GetResourcesRequests("Memory", v.Spec),
+			Age:       model.GetAge(v.CreationTimestamp.Unix()),
+		})
 	}
+
 	return &PodResp{
 		Total: total,
-		Item:  pods,
+		Item:  items,
 	}, err
 }
 
-// 获取pod 详情
+// GetPodDetail 获取pod 详情
 func (p *pod) GetPodDetail(Name, Namespace string) (pod *corev1.Pod, err error) {
-	poddetail, err := K8s.Clientset.CoreV1().Pods(Namespace).Get(context.TODO(), Name, metav1.GetOptions{})
+	podDetail, err := K8s.Clientset.CoreV1().Pods(Namespace).Get(context.TODO(), Name, metav1.GetOptions{})
 	if err != nil {
 		logger.Info("获取pod 详情失败" + err.Error())
 		return nil, errors.New("获取pod 详情失败")
 	}
-	return poddetail, nil
+	return podDetail, nil
 }
 
-// 删除 pod
+// DelPod 删除 pod
 func (p *pod) DelPod(Name, Namespace string) error {
 	err := K8s.Clientset.CoreV1().Pods(Namespace).Delete(context.TODO(), Name, metav1.DeleteOptions{})
 	if err != nil {
@@ -104,9 +130,9 @@ func (p *pod) DelPod(Name, Namespace string) error {
 	return nil
 }
 
-// 更新 pod
-func (p *pod) UpdataPod(npod *corev1.Pod, Namespaces string) error {
-	_, err := K8s.Clientset.CoreV1().Pods(Namespaces).Update(context.TODO(), npod, metav1.UpdateOptions{})
+// UpdatePod  更新 pod
+func (p *pod) UpdatePod(pod *corev1.Pod, Namespaces string) error {
+	_, err := K8s.Clientset.CoreV1().Pods(Namespaces).Update(context.TODO(), pod, metav1.UpdateOptions{})
 	if err != nil {
 		logger.Info("更新失败" + err.Error())
 		return errors.New("更新失败" + err.Error())
@@ -114,7 +140,7 @@ func (p *pod) UpdataPod(npod *corev1.Pod, Namespaces string) error {
 	return nil
 }
 
-// 获取pod 的容器列表
+// GetContainer 获取pod 的容器列表
 func (p *pod) GetContainer(podName, Namespaces string) (containers []string, err error) {
 	pod, err := p.GetPodDetail(podName, Namespaces)
 	if err != nil {
@@ -127,30 +153,30 @@ func (p *pod) GetContainer(podName, Namespaces string) (containers []string, err
 	return containers, nil
 }
 
-// 获取pod 内容器日志
-func (p *pod) GetContainerLog(podname, containername, namespaces string) (log string, err error) {
-	taillines := int64(config.Logtaillimit)
+// GetContainerLog 获取pod 内容器日志
+func (p *pod) GetContainerLog(podName, containerName, namespaces string) (log string, err error) {
+	tailLines := int64(config.Logtaillimit)
 	//设置日志的配置，容器名，获取的内容的配置
-	logopt := &corev1.PodLogOptions{
-		Container: containername,
+	logOpt := &corev1.PodLogOptions{
+		Container: containerName,
 		Follow:    false,
-		TailLines: &taillines,
+		TailLines: &tailLines,
 	}
 
 	//获取一个request 实例
-	request := K8s.Clientset.CoreV1().Pods(namespaces).GetLogs(podname, logopt)
+	request := K8s.Clientset.CoreV1().Pods(namespaces).GetLogs(podName, logOpt)
 
 	//发起stream连接，到底response.body
-	podlog, err := request.Stream(context.TODO())
+	podLog, err := request.Stream(context.TODO())
 	if err != nil {
-		logger.Info("获取podlog 失败" + err.Error())
-		return "", errors.New("获取podlog 失败")
+		logger.Info("获取pod-log 失败" + err.Error())
+		return "", errors.New("获取pod-log 失败")
 	}
 	//延时关闭
-	defer podlog.Close()
+	defer podLog.Close()
 	//将response.body 写入缓冲区，用于转化成string 类型
 	buf := new(bytes.Buffer)
-	_, err = io.Copy(buf, podlog)
+	_, err = io.Copy(buf, podLog)
 	if err != nil {
 		logger.Info("写入缓冲失败 失败" + err.Error())
 		return "", errors.New("写入缓冲失败 失败")
@@ -158,26 +184,26 @@ func (p *pod) GetContainerLog(podname, containername, namespaces string) (log st
 	return buf.String(), nil
 }
 
-// 获取每个namespace 下pod的数量
-func (p *pod) Countpod() (total []Podnp, err error) {
+// CountPod  获取每个namespace 下pod的数量
+func (p *pod) CountPod() (total []Podnp, err error) {
 	//获取所有的namespaces
-	namespacelist, err := K8s.Clientset.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
+	namespaceList, err := K8s.Clientset.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		logger.Info("获取namespace 列表失败" + err.Error())
 		return nil, errors.New("获取namespace 列表失败")
 	}
 
 	////获取每个ns下的pod数量
-	for _, namespace := range namespacelist.Items {
-		podlist, err := K8s.Clientset.CoreV1().Pods(namespace.Name).List(context.TODO(), metav1.ListOptions{})
+	for _, namespace := range namespaceList.Items {
+		plist, err := K8s.Clientset.CoreV1().Pods(namespace.Name).List(context.TODO(), metav1.ListOptions{})
 		if err != nil {
-			logger.Info("获取namespace下podlist 列表失败" + err.Error())
-			return nil, errors.New("获取namespace下podlist 列表失败")
+			logger.Info("获取namespace下plist 列表失败" + err.Error())
+			return nil, errors.New("获取namespace下plist 列表失败")
 		}
 		//组装数据
 		npm := &Podnp{
 			Name:   namespace.Name,
-			Number: len(podlist.Items),
+			Number: len(plist.Items),
 		}
 		fmt.Println(npm)
 		total = append(total, *npm)

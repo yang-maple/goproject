@@ -53,7 +53,7 @@ func (t *terminal) WsHandler(w http.ResponseWriter, r *http.Request) {
 			Stderr:    true,
 			TTY:       true,
 			Container: containerName,
-			Command:   []string{"/bin/sh"},
+			Command:   []string{"/bin/bash"},
 		}, scheme.ParameterCodec)
 	logger.Info("exec post request url:", req)
 
@@ -147,6 +147,7 @@ func (t *TerminalSession) Read(p []byte) (int, error) {
 	//逻辑判断
 	switch msg.Operation {
 	case "stdin":
+		msg.Data = msg.Data + "\r"
 		return copy(p, msg.Data), nil
 	case "resize":
 		t.sizeChan <- remotecommand.TerminalSize{
@@ -157,7 +158,7 @@ func (t *TerminalSession) Read(p []byte) (int, error) {
 	case "ping":
 		return 0, nil
 	default:
-		logger.Info("unknown message Operation" + err.Error())
+		logger.Info("unknown message Operation" + msg.Operation)
 		return 0, errors.New("unknown message Operation" + err.Error())
 	}
 }
@@ -167,7 +168,10 @@ func (t *TerminalSession) Write(p []byte) (int, error) {
 	msg, err := json.Marshal(terminalMessage{
 		Operation: "stdout",
 		Data:      string(p),
-	})
+		Rows:      0,
+		Cols:      0,
+	},
+	)
 	if err != nil {
 		logger.Info("write parse message error" + err.Error())
 		return 0, errors.New("write parse message error" + err.Error())

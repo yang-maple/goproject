@@ -11,6 +11,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"kubeops/model"
 	"strconv"
 	"time"
 )
@@ -43,25 +44,43 @@ func (d *deployment) fromcells(cells []DataCell) []appsv1.Deployment {
 
 // DeployResp 定义获取清单的列表
 type DeployResp struct {
-	Total int                 `json:"total"`
-	Item  []appsv1.Deployment `json:"item"`
+	Total int          `json:"total"`
+	Item  []deployinfo `json:"item"`
+}
+
+type deployinfo struct {
+	Name       string            `json:"name"`
+	Namespaces string            `json:"namespaces"`
+	Image      []string          `json:"image"`
+	Labels     map[string]string `json:"labels"`
+	Pods       string            `json:"pods"`
+	Age        string            `json:"age"`
+	Status     string            `json:"status"`
 }
 
 // DeploymentCreate 定义DeploymentCreate 结构体用于创建 deployment需要的参数属性的定义
 type DeploymentCreate struct {
-	Name          string            `json:"name"`
-	Namespace     string            `json:"namespace"`
-	Replicas      int32             `json:"replicas"`
-	ContainerName string            `json:"container_name"`
-	Image         string            `json:"image"`
-	Labels        map[string]string `json:"label"`
-	Cpu           string            `json:"cpu"`
-	Memory        string            `json:"memory"`
-	PortName      string            `json:"port_name"`
-	ContainerPort int32             `json:"container_port"`
-	HealthCheck   bool              `json:"health_check"`
-	HealthPath    string            `json:"health_path"`
-	Protocol      corev1.Protocol   `json:"protocol"`
+	Name        string            `json:"name"`
+	Namespace   string            `json:"namespace"`
+	Replicas    int32             `json:"replicas"`
+	Labels      map[string]string `json:"labels"`
+	Container   []container       `json:"container"`
+	HealthCheck bool              `json:"health_check"`
+	HealthPath  string            `json:"health_path"`
+}
+
+type container struct {
+	ContainerName string          `json:"container_name"`
+	Image         string          `json:"image"`
+	Cpu           string          `json:"cpu"`
+	Memory        string          `json:"memory"`
+	Containerport []containerport `json:"container_port"`
+}
+
+type containerport struct {
+	PortName      string          `json:"port_name"`
+	ContainerPort int32           `json:"container_port"`
+	Protocol      corev1.Protocol `json:"protocol"`
 }
 
 // Deploydp 定义返回的数据类型
@@ -94,12 +113,27 @@ func (d *deployment) GetDeploymentList(DeployName, Namespace string, Limit, Page
 	//分页
 	datapage := filtered.Sort().Pagination()
 	deploys := d.fromcells(datapage.GenericDataList)
+	item := make([]deployinfo, 0, len(deploys))
 	for _, v := range deploys {
-		fmt.Println(v.Name, v.CreationTimestamp.Time)
+		images := make([]string, 0, len(v.Spec.Template.Spec.Containers))
+		for _, im := range v.Spec.Template.Spec.Containers {
+			images = append(images, im.Image)
+		}
+		pods, status := getstatus(v.Status.Replicas, v.Status.ReadyReplicas)
+		item = append(item, deployinfo{
+			Name:       v.Name,
+			Namespaces: v.Namespace,
+			Image:      images,
+			Labels:     v.Labels,
+			Pods:       pods,
+			Age:        model.GetAge(v.CreationTimestamp.Unix()),
+			Status:     status,
+		})
 	}
+
 	return &DeployResp{
 		Total: total,
-		Item:  deploys,
+		Item:  item,
 	}, err
 }
 
@@ -132,9 +166,37 @@ func (d *deployment) ModifyDeployReplicas(Namespace, DeployName string, Replicas
 
 // CreateDeploy 创建 deployment实例
 func (d *deployment) CreateDeploy(data *DeploymentCreate) (err error) {
+
+	containers := make([]corev1.Container, 0, len(data.Container))
+	for _, contain_v := range data.Container {
+		containers_port := make([]corev1.ContainerPort, 0, len(contain_v.Containerport))
+		for _, port_v := range contain_v.Containerport {
+			containers_port = append(containers_port, corev1.ContainerPort{
+				Name:          port_v.PortName,
+				ContainerPort: port_v.ContainerPort,
+				Protocol:      port_v.Protocol,
+			})
+		}
+		containers = append(containers, corev1.Container{
+			Name:  contain_v.ContainerName,
+			Image: contain_v.Image,
+			Ports: containers_port,
+			Resources: corev1.ResourceRequirements{
+				Limits: map[corev1.ResourceName]resource.Quantity{
+					corev1.ResourceCPU:    resource.MustParse(contain_v.Cpu),
+					corev1.ResourceMemory: resource.MustParse(contain_v.Memory),
+				},
+				Requests: map[corev1.ResourceName]resource.Quantity{
+					corev1.ResourceCPU:    resource.MustParse(contain_v.Cpu),
+					corev1.ResourceMemory: resource.MustParse(contain_v.Memory),
+				},
+			},
+		})
+	}
 	deploy := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: data.Name,
+			Name:   data.Name,
+			Labels: data.Labels,
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: &data.Replicas,
@@ -148,29 +210,7 @@ func (d *deployment) CreateDeploy(data *DeploymentCreate) (err error) {
 				Spec: corev1.PodSpec{
 					Volumes:        nil,
 					InitContainers: nil,
-					Containers: []corev1.Container{
-						{
-							Name:  data.ContainerName,
-							Image: data.Image,
-							Ports: []corev1.ContainerPort{
-								{
-									Name:          data.PortName,
-									ContainerPort: data.ContainerPort,
-									Protocol:      data.Protocol,
-								},
-							},
-							Resources: corev1.ResourceRequirements{
-								Limits: map[corev1.ResourceName]resource.Quantity{
-									corev1.ResourceCPU:    resource.MustParse(data.Cpu),
-									corev1.ResourceMemory: resource.MustParse(data.Memory),
-								},
-								Requests: map[corev1.ResourceName]resource.Quantity{
-									corev1.ResourceCPU:    resource.MustParse(data.Cpu),
-									corev1.ResourceMemory: resource.MustParse(data.Memory),
-								},
-							},
-						},
-					},
+					Containers:     containers,
 				},
 			},
 		},
@@ -188,7 +228,7 @@ func (d *deployment) CreateDeploy(data *DeploymentCreate) (err error) {
 						// type=0 表示该结构体实例内的数据为整型，转json 时只需要使用 IntVal 的数据
 						// type=1 表示该结构体实例内的数据为字符串，转json 时只需要使用 StrVal 的数据
 						Type:   0,
-						IntVal: data.ContainerPort,
+						IntVal: data.Container[0].Containerport[0].ContainerPort,
 					},
 				},
 			},
@@ -282,3 +322,95 @@ func (d *deployment) RolloutDeploy(Namespace, DeployName string) (err error) {
 	}
 	return nil
 }
+
+func getstatus(replicas, ready int32) (string, string) {
+	if ready == replicas {
+		return strconv.FormatInt(int64(ready), 32) + "/" + strconv.FormatInt(int64(replicas), 32), "Running"
+	}
+	return strconv.FormatInt(int64(ready), 32) + "/" + strconv.FormatInt(int64(replicas), 32), "Pending"
+}
+
+/*
+
+type DeploymentCreate struct {
+	Name          string            `json:"name"`
+	Namespace     string            `json:"namespace"`
+	Replicas      int32             `json:"replicas"`
+	ContainerName string            `json:"container_name"`
+	Image         string            `json:"image"`
+	Labels        map[string]string `json:"labels"`
+	Cpu           string            `json:"cpu" `
+	Memory        string            `json:"memory" `
+	PortName      string            `json:"port_name"`
+	ContainerPort int32             `json:"container_port"`
+	HealthCheck   bool              `json:"health_check"`
+	HealthPath    string            `json:"health_path"`
+	Protocol      corev1.Protocol   `json:"protocol"`
+}
+deploy := &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:   data.Name,
+			Labels: data.Labels,
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: &data.Replicas,
+			Selector: &metav1.LabelSelector{
+				MatchLabels: data.Labels,
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: data.Labels,
+				},
+				Spec: corev1.PodSpec{
+					Volumes:        nil,
+					InitContainers: nil,
+					Containers: []corev1.Container{
+						{
+							Name:  data.ContainerName,
+							Image: data.Image,
+							Ports: []corev1.ContainerPort{
+								{
+									Name:          data.PortName,
+									ContainerPort: data.ContainerPort,
+									Protocol:      data.Protocol,
+								},
+							},
+							Resources: corev1.ResourceRequirements{
+								Limits: map[corev1.ResourceName]resource.Quantity{
+									corev1.ResourceCPU:    resource.MustParse(data.Cpu),
+									corev1.ResourceMemory: resource.MustParse(data.Memory),
+								},
+								Requests: map[corev1.ResourceName]resource.Quantity{
+									corev1.ResourceCPU:    resource.MustParse(data.Cpu),
+									corev1.ResourceMemory: resource.MustParse(data.Memory),
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	// 判断是否打开健康检测
+	if data.HealthCheck {
+		deploy.Spec.Template.Spec.Containers[0].LivenessProbe = &corev1.Probe{
+			//设置第一个容器的readinessprobe
+			// 若存在多个容器 使用for 进行定义
+			ProbeHandler: corev1.ProbeHandler{
+				HTTPGet: &corev1.HTTPGetAction{
+					Path: data.HealthPath,
+					Port: intstr.IntOrString{
+						// intstr.IntOrString 的作用是端口可以定义为整型，也可以定义为字符
+						// type=0 表示该结构体实例内的数据为整型，转json 时只需要使用 IntVal 的数据
+						// type=1 表示该结构体实例内的数据为字符串，转json 时只需要使用 StrVal 的数据
+						Type:   0,
+						IntVal: data.ContainerPort,
+					},
+				},
+			},
+			InitialDelaySeconds: 15,
+			TimeoutSeconds:      5,
+			PeriodSeconds:       5,
+		}
+	}
+*/

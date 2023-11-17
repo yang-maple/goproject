@@ -83,3 +83,13 @@ func (n *namespace) CreateNs(NsName string) (err error) {
 
 	return nil
 }
+
+// UpdateNs  更新
+func (n *namespace) UpdateNs(deploy *corev1.Namespace) (err error) {
+	_, err = K8s.Clientset.CoreV1().Namespaces().Update(context.TODO(), deploy, metav1.UpdateOptions{})
+	if err != nil {
+		logger.Info("NameSpaces 更新失败" + err.Error())
+		return errors.New("NameSpaces 更新失败" + err.Error())
+	}
+	return nil
+}
