@@ -35,7 +35,7 @@ type Workflowcreate struct {
 	Type      string            `json:"type"`
 	Deploy    DeploymentCreate  `json:"deploy"`
 	Service   CreateService     `json:"service"`
-	Ingress   Createingress     `json:"ingress"`
+	Ingress   CreateIngress     `json:"ingress"`
 }
 
 // GetWorkflowList 获取工作流列表
@@ -153,7 +153,7 @@ func createWorkflowRes(data *Workflowcreate) (err error) {
 	}
 	//创建资源
 	//判断 ingress 的类型
-	var ing *Createingress
+	var ing *CreateIngress
 	if data.Type == "Ingress" {
 		//组装数据
 		ing = &data.Ingress

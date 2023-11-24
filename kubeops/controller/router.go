@@ -36,17 +36,18 @@ func (router *router) InitApiRouter(r *gin.Engine) {
 	}
 	v3 := r.Group("/v1/api/daemon")
 	{
-		v3.GET("/list", Daemonset.GetDaemonsetlist)
-		v3.GET("/detail", Daemonset.GetDaemonsetDetal)
-		v3.DELETE("/delete", Daemonset.DelDaemonset)
-		v3.PUT("/update", Daemonset.UpdataDaemonset)
+		v3.GET("/list", DaemonSet.GetDaemonList)
+		v3.GET("/detail", DaemonSet.GetDaemonDetail)
+		v3.DELETE("/delete", DaemonSet.DelDaemon)
+		v3.PUT("/update", DaemonSet.UpdateDaemon)
 	}
 	v4 := r.Group("/v1/api/stateful")
 	{
-		v4.GET("/list", Statefulset.GetStatefulSetList)
-		v4.GET("/detail", Statefulset.GetStatefulSetDeTal)
-		v4.DELETE("/delete", Statefulset.DelStatefulSet)
-		v4.PUT("/update", Statefulset.UpDataStatefulSet)
+		v4.GET("/list", StatefulSet.GetStatefulSetList)
+		v4.GET("/detail", StatefulSet.GetStatefulDetail)
+		v4.DELETE("/delete", StatefulSet.DelStatefulSet)
+		v4.PUT("/update", StatefulSet.UpDataStatefulSet)
+		v4.PUT("/modify", StatefulSet.ModifyStatefulReplicas)
 	}
 	v5 := r.Group("/v1/api/namespaces")
 	{
@@ -75,6 +76,7 @@ func (router *router) InitApiRouter(r *gin.Engine) {
 		v8.GET("/detail", PersistentVolumeClaim.GetPersistentVolumeClaimDetail)
 		v8.DELETE("/delete", PersistentVolumeClaim.DelPersistentVolumeClaim)
 		v8.POST("/create", PersistentVolumeClaim.CreatePersistentVolumeClaim)
+		v8.PUT("/update", PersistentVolumeClaim.UpdatePersistentVolumeClaim)
 	}
 	v9 := r.Group("/v1/api/svc")
 	{
@@ -82,6 +84,7 @@ func (router *router) InitApiRouter(r *gin.Engine) {
 		v9.GET("/detail", Services.GetServiceDetail)
 		v9.DELETE("/delete", Services.DelServices)
 		v9.POST("/create", Services.CreateService)
+		v9.PUT("/update", Services.UpdateService)
 	}
 	v10 := r.Group("/v1/api/ing")
 	{
@@ -89,13 +92,15 @@ func (router *router) InitApiRouter(r *gin.Engine) {
 		v10.GET("/detail", Ingress.GetIngressDetail)
 		v10.DELETE("/delete", Ingress.DelIngress)
 		v10.POST("/create", Ingress.CreateIngress)
+		v10.PUT("/update", Ingress.UpdateIngress)
 	}
-	V11 := r.Group("/v1/api/cm")
+	v11 := r.Group("/v1/api/cm")
 	{
-		V11.GET("/list", Configmaps.GetConfigmapList)
-		V11.GET("/detail", Configmaps.GetConfigmapDetail)
-		V11.DELETE("/delete", Configmaps.DelConfigmap)
-		V11.POST("/create", Configmaps.CreateConfigmap)
+		v11.GET("/list", Configmaps.GetConfigmapList)
+		v11.GET("/detail", Configmaps.GetConfigmapDetail)
+		v11.DELETE("/delete", Configmaps.DelConfigmap)
+		v11.POST("/create", Configmaps.CreateConfigmap)
+		v11.PUT("/update", Configmaps.UpdateConfigmap)
 	}
 	v12 := r.Group("/v1/api/secret")
 	{
@@ -103,6 +108,7 @@ func (router *router) InitApiRouter(r *gin.Engine) {
 		v12.GET("/detail", Secrets.GetSecretDetail)
 		v12.DELETE("/delete", Secrets.DelSecret)
 		v12.POST("/create", Secrets.CreateSecret)
+		v12.PUT("/update", Secrets.UpdateSecret)
 	}
 	v13 := r.Group("/v1/api/workflow")
 	{

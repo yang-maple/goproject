@@ -3,51 +3,61 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/wonderivan/logger"
 	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"kubeops/model"
 )
 
 // 定义空结构体
-type statefulset struct{}
+type statefulSet struct{}
 
-// 全局变量供外部调用
-var Statefulset statefulset
+// StatefulSet  全局变量供外部调用
+var StatefulSet statefulSet
 
-// 定义返回的结构体
+// StsResp 定义返回的结构体
 type StsResp struct {
-	Total int                  `json:"total"`
-	Sts   []appsv1.StatefulSet `json:"sts"`
+	Total int            `json:"total"`
+	Item  []statefulInfo `json:"item"`
 }
 
-// 将statefulsetcell 转换为 datacell
-func (s statefulset) tocells(statecell []appsv1.StatefulSet) []DataCell {
-	cells := make([]DataCell, len(statecell))
+type statefulInfo struct {
+	Name       string            `json:"name"`
+	Namespaces string            `json:"namespaces"`
+	Image      []string          `json:"image"`
+	Labels     map[string]string `json:"labels"`
+	Pods       string            `json:"pods"`
+	Age        string            `json:"age"`
+	Status     string            `json:"status"`
+}
+
+// toCells 将 statefulCell 转换为 dataCell
+func (s *statefulSet) toCells(statefulCell []appsv1.StatefulSet) []DataCell {
+	cells := make([]DataCell, len(statefulCell))
 	for i := range cells {
-		cells[i] = statefulsetCell(statecell[i])
+		cells[i] = statefulsetCell(statefulCell[i])
 	}
 	return cells
 }
 
-// 将datacell 转换为 statefulsetcell
-func (s statefulset) fromcells(cells []DataCell) []appsv1.StatefulSet {
-	statefulcell := make([]appsv1.StatefulSet, len(cells))
-	for i := range statefulcell {
-		statefulcell[i] = appsv1.StatefulSet(cells[i].(statefulsetCell))
+// 将dataCell 转换为 statefulCell
+func (s *statefulSet) fromCells(cells []DataCell) []appsv1.StatefulSet {
+	statefulCell := make([]appsv1.StatefulSet, len(cells))
+	for i := range statefulCell {
+		statefulCell[i] = appsv1.StatefulSet(cells[i].(statefulsetCell))
 	}
-	return statefulcell
+	return statefulCell
 }
 
-// 列表
-func (s *statefulset) GetStsList(StsName, Namespace string, Limit, Page int) (stsresp *StsResp, err error) {
-	stslist, err := K8s.Clientset.AppsV1().StatefulSets(Namespace).List(context.TODO(), metav1.ListOptions{})
+// GetStatefulList  列表
+func (s *statefulSet) GetStatefulList(StsName, Namespace string, Limit, Page int) (stsResp *StsResp, err error) {
+	statefulList, err := K8s.Clientset.AppsV1().StatefulSets(Namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		logger.Info("获取stslist 失败" + err.Error())
-		return nil, errors.New("获取stslist 失败" + err.Error())
+		logger.Info("获取 statefulList 失败" + err.Error())
+		return nil, errors.New("获取 statefulList 失败" + err.Error())
 	}
-	selectdata := &dataselector{
-		GenericDataList: s.tocells(stslist.Items),
+	selectData := &dataselector{
+		GenericDataList: s.toCells(statefulList.Items),
 		DataSelect: &DataSelectQuery{
 			Filter: &FilterQuery{StsName},
 			Paginate: &PaginateQuery{
@@ -57,36 +67,49 @@ func (s *statefulset) GetStsList(StsName, Namespace string, Limit, Page int) (st
 		},
 	}
 
-	selectdata.Filter()
 	//先过滤 后排序
-	filtered := selectdata.Filter()
+	filtered := selectData.Filter()
 	total := len(filtered.GenericDataList)
 	//分页
-	datapage := filtered.Sort().Pagination()
-	states := s.fromcells(datapage.GenericDataList)
+	dataPage := filtered.Sort().Pagination()
+	states := s.fromCells(dataPage.GenericDataList)
+	item := make([]statefulInfo, 0, total)
 	for _, v := range states {
-		fmt.Println(v.Name, v.CreationTimestamp.Time)
+		images := make([]string, 0, len(v.Spec.Template.Spec.Containers))
+		for _, im := range v.Spec.Template.Spec.Containers {
+			images = append(images, im.Image)
+		}
+		pods, status := model.GetStatus(v.Status.Replicas, v.Status.ReadyReplicas)
+		item = append(item, statefulInfo{
+			Name:       v.Name,
+			Namespaces: v.Namespace,
+			Image:      images,
+			Labels:     v.Labels,
+			Pods:       pods,
+			Age:        model.GetAge(v.CreationTimestamp.Unix()),
+			Status:     status,
+		})
 	}
 	return &StsResp{
 		Total: total,
-		Sts:   states,
+		Item:  item,
 	}, err
 
 }
 
-// 详情
-func (s *statefulset) GetStsDetal(Namespace, StsName string) (detail *appsv1.StatefulSet, err error) {
+// GetStatefulDetail 详情
+func (s *statefulSet) GetStatefulDetail(Namespace, StsName string) (detail *appsv1.StatefulSet, err error) {
 	//获取deploy
 	detail, err = K8s.Clientset.AppsV1().StatefulSets(Namespace).Get(context.TODO(), StsName, metav1.GetOptions{})
 	if err != nil {
-		logger.Info("获取statefulset 详情失败" + err.Error())
-		return nil, errors.New("获取statefulset 详情失败" + err.Error())
+		logger.Info("获取 stateful set 详情失败" + err.Error())
+		return nil, errors.New("获取 stateful set 详情失败" + err.Error())
 	}
 	return detail, nil
 }
 
-// 删除
-func (s *statefulset) DelSts(Namespace, StsName string) (err error) {
+// DelStateful 删除
+func (s *statefulSet) DelStateful(Namespace, StsName string) (err error) {
 	err = K8s.Clientset.AppsV1().StatefulSets(Namespace).Delete(context.TODO(), StsName, metav1.DeleteOptions{})
 	if err != nil {
 		logger.Info("删除实例失败" + err.Error())
@@ -95,13 +118,29 @@ func (s *statefulset) DelSts(Namespace, StsName string) (err error) {
 	return nil
 }
 
-// 更新
-func (s *statefulset) UpdataSts(Namespace string, Sts *appsv1.StatefulSet) (err error) {
+// UpdateDelStateful 更新
+func (s *statefulSet) UpdateDelStateful(Namespace string, Sts *appsv1.StatefulSet) (err error) {
 	_, err = K8s.Clientset.AppsV1().StatefulSets(Namespace).Update(context.TODO(), Sts, metav1.UpdateOptions{})
 	if err != nil {
 		logger.Info("StatefulSets 更新失败" + err.Error())
 		return errors.New("StatefulSets 更新失败" + err.Error())
 	}
 
+	return nil
+}
+
+// ModifyStatefulReplicas 修改deployment 副本数
+func (s *statefulSet) ModifyStatefulReplicas(Namespace, StsName string, Replicas *int32) (err error) {
+	stateful, err := K8s.Clientset.AppsV1().StatefulSets(Namespace).Get(context.TODO(), StsName, metav1.GetOptions{})
+	if err != nil {
+		logger.Info("获取 Stateful 数据失败" + err.Error())
+		return errors.New("Stateful 详情失败" + err.Error())
+	}
+	stateful.Spec.Replicas = Replicas
+	_, err = K8s.Clientset.AppsV1().StatefulSets(Namespace).Update(context.TODO(), stateful, metav1.UpdateOptions{})
+	if err != nil {
+		logger.Info("更新副本数失败" + err.Error())
+		return errors.New("更新副本数失败" + err.Error())
+	}
 	return nil
 }

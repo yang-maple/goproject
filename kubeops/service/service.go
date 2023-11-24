@@ -8,15 +8,27 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"kubeops/model"
 )
 
 type service struct{}
 
 var Services service
 
-type Svcresp struct {
-	Total int              `json:"total"`
-	Item  []corev1.Service `json:"item"`
+type svcResp struct {
+	Total int       `json:"total"`
+	Item  []svcInfo `json:"item"`
+}
+
+type svcInfo struct {
+	Name       string             `json:"name"`
+	Namespace  string             `json:"namespace"`
+	Labels     map[string]string  `json:"labels"`
+	Type       corev1.ServiceType `json:"type"`
+	ClusterIp  string             `json:"cluster_ip"`
+	ExternalIp []string           `json:"external_ip"`
+	Port       string             `json:"port"`
+	Age        string             `json:"age"`
 }
 
 type CreateService struct {
@@ -24,18 +36,18 @@ type CreateService struct {
 	Namespace    string            `json:"namespace"`
 	Labels       map[string]string `json:"labels"`
 	Type         string            `json:"type"`
-	Serviceports []Serviceport     `json:"service_port"`
+	ServicePorts []Port            `json:"service_ports"`
 }
-type Serviceport struct {
-	Portname   string          `json:"port_name"`
+type Port struct {
+	PortName   string          `json:"port_name"`
 	Port       int32           `json:"port"`
 	Protocol   corev1.Protocol `json:"protocol"`
 	TargetPort int32           `json:"target_port"`
 	NodePort   int32           `json:"node_port"`
 }
 
-// 数据类型转换 tocells
-func (s *service) tocells(svc []corev1.Service) []DataCell {
+// 数据类型转换 cells
+func (s *service) toCells(svc []corev1.Service) []DataCell {
 	cells := make([]DataCell, len(svc))
 	for i := range svc {
 		cells[i] = serviceCell(svc[i])
@@ -43,7 +55,7 @@ func (s *service) tocells(svc []corev1.Service) []DataCell {
 	return cells
 }
 
-func (s *service) fromcells(cells []DataCell) []corev1.Service {
+func (s *service) fromCells(cells []DataCell) []corev1.Service {
 	svc := make([]corev1.Service, len(cells))
 	for i := range cells {
 		svc[i] = corev1.Service(cells[i].(serviceCell))
@@ -52,17 +64,17 @@ func (s *service) fromcells(cells []DataCell) []corev1.Service {
 }
 
 // GetSvcList 获取services列表
-func (s *service) GetSvcList(Svcname, Namespace string, Limit, Page int) (DP *Svcresp, err error) {
+func (s *service) GetSvcList(svcName, Namespace string, Limit, Page int) (DP *svcResp, err error) {
 	//获取deployment 的所有清单列表
-	svclist, err := K8s.Clientset.CoreV1().Services(Namespace).List(context.TODO(), metav1.ListOptions{})
+	svcList, err := K8s.Clientset.CoreV1().Services(Namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		logger.Info("获取 svclist 失败" + err.Error())
+		logger.Info("获取 svc list 失败" + err.Error())
 	}
 	//组装数据
-	selectdata := &dataselector{
-		GenericDataList: s.tocells(svclist.Items),
+	selectData := &dataselector{
+		GenericDataList: s.toCells(svcList.Items),
 		DataSelect: &DataSelectQuery{
-			Filter: &FilterQuery{Svcname},
+			Filter: &FilterQuery{svcName},
 			Paginate: &PaginateQuery{
 				limit: Limit,
 				page:  Page,
@@ -70,24 +82,37 @@ func (s *service) GetSvcList(Svcname, Namespace string, Limit, Page int) (DP *Sv
 		},
 	}
 	//先过滤 后排序
-	filtered := selectdata.Filter()
+	filtered := selectData.Filter()
 	total := len(filtered.GenericDataList)
 	//分页
-	datapage := filtered.Sort().Pagination()
-	svcs := s.fromcells(datapage.GenericDataList)
-	for _, v := range svcs {
-		fmt.Println(v.Name, v.CreationTimestamp.Time)
+	dataPage := filtered.Sort().Pagination()
+	svc := s.fromCells(dataPage.GenericDataList)
+	item := make([]svcInfo, 0, total)
+	for _, v := range svc {
+		externalIp := make([]string, 0)
+		for _, value := range v.Spec.ExternalIPs {
+			externalIp = append(externalIp, value)
+		}
+		item = append(item, svcInfo{
+			Name:       v.Name,
+			Namespace:  v.Namespace,
+			Labels:     v.Labels,
+			Type:       v.Spec.Type,
+			ClusterIp:  v.Spec.ClusterIP,
+			ExternalIp: externalIp,
+			Age:        model.GetAge(v.CreationTimestamp.Unix()),
+		})
 	}
-	return &Svcresp{
+	return &svcResp{
 		Total: total,
-		Item:  svcs,
+		Item:  item,
 	}, err
 }
 
 // GetSvcDetail 获取 services 详情
-func (s *service) GetSvcDetail(Namespace, Svcname string) (detail *corev1.Service, err error) {
+func (s *service) GetSvcDetail(Namespace, svcName string) (detail *corev1.Service, err error) {
 	//获取deploy
-	detail, err = K8s.Clientset.CoreV1().Services(Namespace).Get(context.TODO(), Svcname, metav1.GetOptions{})
+	detail, err = K8s.Clientset.CoreV1().Services(Namespace).Get(context.TODO(), svcName, metav1.GetOptions{})
 	if err != nil {
 		logger.Info("获取services 详情失败" + err.Error())
 		return nil, errors.New("获取services 详情失败" + err.Error())
@@ -98,7 +123,7 @@ func (s *service) GetSvcDetail(Namespace, Svcname string) (detail *corev1.Servic
 // CreateSvc 创建 services
 func (s *service) CreateSvc(data *CreateService) (err error) {
 	fmt.Println(data)
-	createsvc := &corev1.Service{
+	createSvc := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   data.Name,
 			Labels: data.Labels,
@@ -109,26 +134,26 @@ func (s *service) CreateSvc(data *CreateService) (err error) {
 		},
 		Status: corev1.ServiceStatus{},
 	}
-	for i := range data.Serviceports {
-		specport := corev1.ServicePort{
-			Name:     data.Serviceports[i].Portname,
-			Protocol: data.Serviceports[i].Protocol,
-			Port:     data.Serviceports[i].Port,
+	for i := range data.ServicePorts {
+		specPort := corev1.ServicePort{
+			Name:     data.ServicePorts[i].PortName,
+			Protocol: data.ServicePorts[i].Protocol,
+			Port:     data.ServicePorts[i].Port,
 			TargetPort: intstr.IntOrString{
 				Type:   0,
-				IntVal: data.Serviceports[i].TargetPort,
+				IntVal: data.ServicePorts[i].TargetPort,
 			},
 			NodePort: 0,
 		}
-		if data.Type == "NodePort" && data.Serviceports[i].NodePort != 0 {
-			createsvc.Spec.Type = "NodePort"
-			specport.NodePort = data.Serviceports[i].NodePort
-			fmt.Println(i, data.Serviceports[i].NodePort)
+		if data.Type == "NodePort" && data.ServicePorts[i].NodePort != 0 {
+			createSvc.Spec.Type = "NodePort"
+			specPort.NodePort = data.ServicePorts[i].NodePort
+			fmt.Println(i, data.ServicePorts[i].NodePort)
 		}
-		createsvc.Spec.Ports = append(createsvc.Spec.Ports, specport)
+		createSvc.Spec.Ports = append(createSvc.Spec.Ports, specPort)
 	}
-	fmt.Println(createsvc)
-	_, err = K8s.Clientset.CoreV1().Services(data.Namespace).Create(context.TODO(), createsvc, metav1.CreateOptions{})
+	fmt.Println(createSvc)
+	_, err = K8s.Clientset.CoreV1().Services(data.Namespace).Create(context.TODO(), createSvc, metav1.CreateOptions{})
 	if err != nil {
 		logger.Info("创建 service 失败" + err.Error())
 		return errors.New("创建 service 失败" + err.Error())
@@ -138,8 +163,8 @@ func (s *service) CreateSvc(data *CreateService) (err error) {
 }
 
 // DelSvc 删除 services
-func (s *service) DelSvc(Namespace, Svcname string) (err error) {
-	err = K8s.Clientset.CoreV1().Services(Namespace).Delete(context.TODO(), Svcname, metav1.DeleteOptions{})
+func (s *service) DelSvc(Namespace, svcName string) (err error) {
+	err = K8s.Clientset.CoreV1().Services(Namespace).Delete(context.TODO(), svcName, metav1.DeleteOptions{})
 	if err != nil {
 		logger.Info("删除service失败" + err.Error())
 		return errors.New("删除service失败" + err.Error())

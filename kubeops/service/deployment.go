@@ -119,7 +119,7 @@ func (d *deployment) GetDeploymentList(DeployName, Namespace string, Limit, Page
 		for _, im := range v.Spec.Template.Spec.Containers {
 			images = append(images, im.Image)
 		}
-		pods, status := getstatus(v.Status.Replicas, v.Status.ReadyReplicas)
+		pods, status := model.GetStatus(v.Status.Replicas, v.Status.ReadyReplicas)
 		item = append(item, deployinfo{
 			Name:       v.Name,
 			Namespaces: v.Namespace,
@@ -321,13 +321,6 @@ func (d *deployment) RolloutDeploy(Namespace, DeployName string) (err error) {
 		return errors.New("回滚deploy 失败" + err.Error())
 	}
 	return nil
-}
-
-func getstatus(replicas, ready int32) (string, string) {
-	if ready == replicas {
-		return strconv.FormatInt(int64(ready), 32) + "/" + strconv.FormatInt(int64(replicas), 32), "Running"
-	}
-	return strconv.FormatInt(int64(ready), 32) + "/" + strconv.FormatInt(int64(replicas), 32), "Pending"
 }
 
 /*

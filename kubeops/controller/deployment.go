@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/wonderivan/logger"
 	appsv1 "k8s.io/api/apps/v1"
+	"kubeops/model"
 	"kubeops/service"
 	"net/http"
 )
@@ -13,11 +14,6 @@ import (
 var Deployment deployment
 
 type deployment struct {
-}
-
-// Int32Ptr 将int 转化为 *int32
-func Int32Ptr(i int32) *int32 {
-	return &i
 }
 
 // GetDeploylist 获取deployment列表
@@ -66,7 +62,7 @@ func (d *deployment) ModifyDeployReplicas(c *gin.Context) {
 		logger.Info("绑定参数失败" + err.Error())
 		return
 	}
-	replicas := Int32Ptr(int32(params.Replicas))
+	replicas := model.Int32Ptr(int32(params.Replicas))
 	err = service.Deployment.ModifyDeployReplicas(params.Namespace, params.DeployName, replicas)
 	if err != nil {
 
@@ -209,7 +205,7 @@ func (d *deployment) UpdateDeploy(c *gin.Context) {
 	}
 	err = service.Deployment.UpdateDeploy(params.Namespace, params.Data)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"msg":    "更新失败",
 			"reason": errors.New(err.Error()),
 		})

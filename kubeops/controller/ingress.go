@@ -1,8 +1,10 @@
 package controller
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/wonderivan/logger"
+	networkv1 "k8s.io/api/networking/v1"
 	"kubeops/service"
 	"net/http"
 )
@@ -103,8 +105,10 @@ func (i *ingress) DelIngress(c *gin.Context) {
 
 // CreateIngress  创建 Ingress 资源
 func (i *ingress) CreateIngress(c *gin.Context) {
-	createingress := new(service.Createingress)
-	err := c.ShouldBindJSON(&createingress)
+	createIngress := new(struct {
+		Data *service.CreateIngress `json:"data"`
+	})
+	err := c.ShouldBindJSON(&createIngress)
 	if err != nil {
 		logger.Info("绑定参数失败" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -113,7 +117,7 @@ func (i *ingress) CreateIngress(c *gin.Context) {
 		})
 		return
 	}
-	err = service.Ingress.CreateIng(createingress)
+	err = service.Ingress.CreateIng(createIngress.Data)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"msg":  "创建 Services 失败",
@@ -125,4 +129,33 @@ func (i *ingress) CreateIngress(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"msg": "创建 Services 成功",
 	})
+}
+
+// UpdateIngress  更新 Ingress 资源
+func (i *ingress) UpdateIngress(c *gin.Context) {
+
+	params := new(struct {
+		Namespace string             `json:"namespace"`
+		Data      *networkv1.Ingress `json:"data"`
+	})
+	err := c.ShouldBindJSON(&params)
+	if err != nil {
+		logger.Info("绑定参数失败" + err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"err": errors.New("绑定参数失败" + err.Error()),
+		})
+		return
+	}
+	err = service.Ingress.UpdateIng(params.Namespace, params.Data)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"msg":    "更新失败",
+			"reason": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"msg": "更新成功",
+	})
+
 }

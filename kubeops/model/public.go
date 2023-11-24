@@ -1,7 +1,6 @@
 package model
 
 import (
-	"fmt"
 	corev1 "k8s.io/api/core/v1"
 	"strconv"
 	"time"
@@ -66,7 +65,6 @@ func GetResourcesRequests(name string, spec corev1.PodSpec) string {
 		}
 		// 判断单位是 M 还是Mi 整除1000000的是M 否则是Mi
 		if memoryTotal%1000000 == 0 {
-			fmt.Println(spec.Containers[0].Name, ":", memoryTotal)
 			switch {
 			case memoryTotal == 0:
 				return strconv.Itoa(int(memoryTotal))
@@ -88,4 +86,17 @@ func GetResourcesRequests(name string, spec corev1.PodSpec) string {
 		}
 	}
 	return ""
+}
+
+// GetStatus  获取 有/无状态服务的pos 数量和状态
+func GetStatus(replicas, ready int32) (string, string) {
+	if ready == replicas {
+		return strconv.FormatInt(int64(ready), 32) + "/" + strconv.FormatInt(int64(replicas), 32), "Running"
+	}
+	return strconv.FormatInt(int64(ready), 32) + "/" + strconv.FormatInt(int64(replicas), 32), "Pending"
+}
+
+// Int32Ptr int32 转化为 *int32
+func Int32Ptr(i int32) *int32 {
+	return &i
 }

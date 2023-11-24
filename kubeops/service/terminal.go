@@ -88,8 +88,8 @@ func (t *terminal) WsHandler(w http.ResponseWriter, r *http.Request) {
 type terminalMessage struct {
 	Operation string `json:"operation"`
 	Data      string `json:"data"`
-	Rows      uint16 `json:"rows"`
-	Cols      uint16 `json:"cols"`
+	Rows      uint16 `json:"rows" `
+	Cols      uint16 `json:"cols" `
 }
 
 // TerminalSession 定义 websocket 交互结构体 接管输入和输出
@@ -125,7 +125,6 @@ func (t *terminal) NewTerminalSession(w http.ResponseWriter, r *http.Request, re
 		sizeChan: make(chan remotecommand.TerminalSize),
 		doneChan: make(chan struct{}),
 	}
-
 	return session, nil
 }
 
@@ -195,6 +194,7 @@ func (t *TerminalSession) Close() {
 
 // Next resize方法，以及是否退出终端
 func (t *TerminalSession) Next() *remotecommand.TerminalSize {
+
 	select {
 	case size := <-t.sizeChan:
 		return &size

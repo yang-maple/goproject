@@ -3,16 +3,17 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/wonderivan/logger"
+	corev1 "k8s.io/api/core/v1"
 	"kubeops/service"
 	"net/http"
 )
 
-type persistentvolumeclaim struct{}
+type persistentVolumeClaim struct{}
 
-var PersistentVolumeClaim persistentvolumeclaim
+var PersistentVolumeClaim persistentVolumeClaim
 
 // GetPersistentVolumeClaimList 获取 PersistentVolumeClaim 的列表
-func (p *persistentvolumeclaim) GetPersistentVolumeClaimList(c *gin.Context) {
+func (p *persistentVolumeClaim) GetPersistentVolumeClaimList(c *gin.Context) {
 	params := new(struct {
 		FilterName string `form:"filter_name"`
 		Namespace  string `form:"namespace"`
@@ -23,17 +24,14 @@ func (p *persistentvolumeclaim) GetPersistentVolumeClaimList(c *gin.Context) {
 	if err != nil {
 		logger.Info("绑定参数失败" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"msg":  "绑定参数失败",
-			"data": nil,
+			"msg": "绑定参数失败",
 		})
 		return
 	}
-	data, err := service.Pvclaim.GetPVClaimList(params.FilterName, params.Namespace, params.Limit, params.Page)
+	data, err := service.Claim.GetPVClaimList(params.FilterName, params.Namespace, params.Limit, params.Page)
 	if err != nil {
-		logger.Info("获取PersistentVolumeClaim失败" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"msg":  "获取PersistentVolumeClaim失败",
-			"data": nil,
+			"msg": "获取PersistentVolumeClaim失败",
 		})
 		return
 	}
@@ -45,7 +43,7 @@ func (p *persistentvolumeclaim) GetPersistentVolumeClaimList(c *gin.Context) {
 }
 
 // GetPersistentVolumeClaimDetail 获取 PersistentVolumeClaim 详情
-func (p *persistentvolumeclaim) GetPersistentVolumeClaimDetail(c *gin.Context) {
+func (p *persistentVolumeClaim) GetPersistentVolumeClaimDetail(c *gin.Context) {
 	params := new(struct {
 		PersistentVolumeClaimName string `form:"persistent_volume_claim_name"`
 		Namespace                 string `form:"namespace"`
@@ -54,17 +52,14 @@ func (p *persistentvolumeclaim) GetPersistentVolumeClaimDetail(c *gin.Context) {
 	if err != nil {
 		logger.Info("绑定参数失败" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"msg":  "绑定参数失败",
-			"data": nil,
+			"msg": "绑定参数失败",
 		})
 		return
 	}
-	detail, err := service.Pvclaim.GetPVClaimDetail(params.Namespace, params.PersistentVolumeClaimName)
+	detail, err := service.Claim.GetPVClaimDetail(params.Namespace, params.PersistentVolumeClaimName)
 	if err != nil {
-		logger.Info("获取PersistentVolumeClaim 详情失败" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"msg":  "获取PersistentVolumeClaim 详情失败",
-			"data": nil,
+			"msg": "获取PersistentVolumeClaim 详情失败",
 		})
 		return
 	}
@@ -76,23 +71,22 @@ func (p *persistentvolumeclaim) GetPersistentVolumeClaimDetail(c *gin.Context) {
 }
 
 // CreatePersistentVolumeClaim 创建PersistentVolumeClaim 资源
-func (p *persistentvolumeclaim) CreatePersistentVolumeClaim(c *gin.Context) {
-	createpvc := new(service.Createpvclaim)
-	err := c.ShouldBindJSON(&createpvc)
+func (p *persistentVolumeClaim) CreatePersistentVolumeClaim(c *gin.Context) {
+	createPvc := new(struct {
+		Data *service.CreateClaim `json:"data"`
+	})
+	err := c.ShouldBindJSON(&createPvc)
 	if err != nil {
 		logger.Info("绑定参数失败" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"msg":  "绑定参数失败",
-			"data": nil,
+			"msg": "绑定参数失败",
 		})
 		return
 	}
-	err = service.Pvclaim.CreatePVClaim(createpvc)
+	err = service.Claim.CreatePVClaim(createPvc.Data)
 	if err != nil {
-		logger.Info("创建PersistentVolumeClaim失败" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"msg":  "创建PersistentVolumeClaim失败",
-			"data": nil,
+			"msg": "创建PersistentVolumeClaim失败",
 		})
 		return
 	}
@@ -103,7 +97,7 @@ func (p *persistentvolumeclaim) CreatePersistentVolumeClaim(c *gin.Context) {
 }
 
 // DelPersistentVolumeClaim 删除 PersistentVolumeClaim 资源
-func (p *persistentvolumeclaim) DelPersistentVolumeClaim(c *gin.Context) {
+func (p *persistentVolumeClaim) DelPersistentVolumeClaim(c *gin.Context) {
 	params := new(struct {
 		PersistentVolumeClaimName string `form:"persistent_volume_claim_name"`
 		Namespace                 string `form:"namespace"`
@@ -112,22 +106,46 @@ func (p *persistentvolumeclaim) DelPersistentVolumeClaim(c *gin.Context) {
 	if err != nil {
 		logger.Info("绑定参数失败" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"msg":  "绑定参数失败",
-			"data": nil,
+			"msg": "绑定参数失败",
 		})
 		return
 	}
-	err = service.Pvclaim.DelPVClaim(params.Namespace, params.PersistentVolumeClaimName)
+	err = service.Claim.DelPVClaim(params.Namespace, params.PersistentVolumeClaimName)
 	if err != nil {
-		logger.Info("删除 PersistentVolumeClaim 失败" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"msg":  "删除 PersistentVolumeClaim 失败",
-			"data": nil,
+			"msg": "删除 PersistentVolumeClaim 失败",
 		})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"msg": "删除 PersistentVolumeClaim 成功",
+	})
+}
+
+// UpdatePersistentVolumeClaim 更新 PersistentVolumeClaim 资源
+func (p *persistentVolumeClaim) UpdatePersistentVolumeClaim(c *gin.Context) {
+	params := new(struct {
+		Data      *corev1.PersistentVolumeClaim `json:"data"`
+		Namespace string                        `json:"namespace"`
+	})
+	err := c.ShouldBindJSON(&params)
+	if err != nil {
+		logger.Info("绑定参数失败" + err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"msg": "绑定参数失败",
+		})
+		return
+	}
+	err = service.Claim.UpdatePVClaim(params.Namespace, params.Data)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"msg": "更新 PersistentVolumeClaim 失败",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"msg": "更新 PersistentVolumeClaim 成功",
 	})
 }

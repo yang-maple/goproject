@@ -9,13 +9,13 @@ import (
 	"net/http"
 )
 
-var Daemonset daemonset
+var DaemonSet daemonSet
 
-type daemonset struct {
+type daemonSet struct {
 }
 
-// 获取list
-func (d *daemonset) GetDaemonsetlist(c *gin.Context) {
+// GetDaemonList 获取list
+func (d *daemonSet) GetDaemonList(c *gin.Context) {
 
 	params := new(struct {
 		FilterName string `form:"filter_name"`
@@ -32,11 +32,11 @@ func (d *daemonset) GetDaemonsetlist(c *gin.Context) {
 		})
 		return
 	}
-	data, err := service.Daemonset.GetDsList(params.FilterName, params.Namespace, params.Limit, params.Page)
+	data, err := service.DaemonSet.GetDsList(params.FilterName, params.Namespace, params.Limit, params.Page)
 	if err != nil {
-		logger.Info("获取 Daemonset 失败" + err.Error())
+		logger.Info("获取 Daemon set 失败" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"msg":  "获取Daemonset失败",
+			"msg":  "获取Daemon set失败",
 			"data": nil,
 		})
 		return
@@ -48,11 +48,11 @@ func (d *daemonset) GetDaemonsetlist(c *gin.Context) {
 	})
 }
 
-// 获取deamonset 详情
-func (d *daemonset) GetDaemonsetDetal(c *gin.Context) {
+// GetDaemonDetail 获取demonetise 详情
+func (d *daemonSet) GetDaemonDetail(c *gin.Context) {
 	params := new(struct {
-		Daemonsetname string `form:"daemonset_name"`
-		Namespace     string `form:"namespace"`
+		DaemonName string `form:"daemon_name"`
+		Namespace  string `form:"namespace"`
 	})
 
 	err := c.Bind(&params)
@@ -63,10 +63,10 @@ func (d *daemonset) GetDaemonsetDetal(c *gin.Context) {
 		})
 		return
 	}
-	Ds, err := service.Daemonset.GetDsDetal(params.Namespace, params.Daemonsetname)
+	Ds, err := service.DaemonSet.GetDsDetail(params.Namespace, params.DaemonName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"err": errors.New("获取Daemonset 失败" + err.Error()),
+			"err": errors.New("获取Daemon set 失败" + err.Error()),
 		})
 		return
 	} else {
@@ -77,11 +77,11 @@ func (d *daemonset) GetDaemonsetDetal(c *gin.Context) {
 	}
 }
 
-// 删除 实例
-func (d *daemonset) DelDaemonset(c *gin.Context) {
+// DelDaemon 删除 实例
+func (d *daemonSet) DelDaemon(c *gin.Context) {
 	params := new(struct {
-		Daemonsetname string `form:"daemonset_name"`
-		Namespace     string `form:"namespace"`
+		DaemonName string `form:"daemon_name"`
+		Namespace  string `form:"namespace"`
 	})
 	err := c.Bind(&params)
 	if err != nil {
@@ -91,7 +91,7 @@ func (d *daemonset) DelDaemonset(c *gin.Context) {
 		})
 		return
 	}
-	err = service.Daemonset.DelDs(params.Namespace, params.Daemonsetname)
+	err = service.DaemonSet.DelDs(params.Namespace, params.DaemonName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"err": errors.New("删除失败" + err.Error()),
@@ -105,8 +105,8 @@ func (d *daemonset) DelDaemonset(c *gin.Context) {
 
 }
 
-// 更新实例
-func (d *daemonset) UpdataDaemonset(c *gin.Context) {
+// UpdateDaemon 更新实例
+func (d *daemonSet) UpdateDaemon(c *gin.Context) {
 
 	params := new(struct {
 		Namespace string            `json:"namespace"`
@@ -121,7 +121,7 @@ func (d *daemonset) UpdataDaemonset(c *gin.Context) {
 		})
 		return
 	}
-	err = service.Daemonset.UpdataDs(params.Namespace, params.Data)
+	err = service.DaemonSet.UpdateDs(params.Namespace, params.Data)
 	if err != nil {
 		logger.Info("更新失败" + err.Error())
 		c.JSON(http.StatusOK, gin.H{

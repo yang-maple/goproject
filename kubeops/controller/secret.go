@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/wonderivan/logger"
+	corev1 "k8s.io/api/core/v1"
 	"kubeops/service"
 	"net/http"
 )
@@ -58,7 +59,7 @@ func (s *secret) GetSecretDetail(c *gin.Context) {
 		})
 		return
 	}
-	detail, err := service.Secrets.GetSecretDetal(params.Namespace, params.SecretName)
+	detail, err := service.Secrets.GetSecretDetail(params.Namespace, params.SecretName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"msg":  "获取Secret 详情失败",
@@ -103,8 +104,10 @@ func (s *secret) DelSecret(c *gin.Context) {
 
 // CreateSecret   创建 Secret 资源
 func (s *secret) CreateSecret(c *gin.Context) {
-	createingress := new(service.Createsecret)
-	err := c.ShouldBindJSON(&createingress)
+	params := new(struct {
+		Data *service.CreateSecret `json:"data"`
+	})
+	err := c.ShouldBindJSON(&params)
 	if err != nil {
 		logger.Info("绑定参数失败" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -113,7 +116,7 @@ func (s *secret) CreateSecret(c *gin.Context) {
 		})
 		return
 	}
-	err = service.Secrets.CreateSecret(createingress)
+	err = service.Secrets.CreateSecret(params.Data)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"msg":  "创建 Secret 失败",
@@ -124,5 +127,33 @@ func (s *secret) CreateSecret(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"msg": "创建 Services 成功",
+	})
+}
+
+// UpdateSecret   更新 Secret 资源
+func (s *secret) UpdateSecret(c *gin.Context) {
+	params := new(struct {
+		Namespace string         `json:"namespace"`
+		Data      *corev1.Secret `json:"data"`
+	})
+	err := c.ShouldBindJSON(&params)
+	if err != nil {
+		logger.Info("绑定参数失败" + err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"msg":  "绑定参数失败",
+			"data": nil,
+		})
+		return
+	}
+	err = service.Secrets.UpdateSecret(params.Namespace, params.Data)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"msg": "更新 Secret 失败",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"msg": "更新 Secret 成功",
 	})
 }

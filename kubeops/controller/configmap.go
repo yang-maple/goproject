@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/wonderivan/logger"
+	corev1 "k8s.io/api/core/v1"
 	"kubeops/service"
 	"net/http"
 )
@@ -103,8 +104,10 @@ func (cm *configmap) DelConfigmap(c *gin.Context) {
 
 // CreateConfigmap  创建 Configmap 资源
 func (cm *configmap) CreateConfigmap(c *gin.Context) {
-	createingress := new(service.Createconfigmap)
-	err := c.ShouldBindJSON(&createingress)
+	params := new(struct {
+		Data *service.CreateConfig `json:"data"`
+	})
+	err := c.ShouldBindJSON(&params)
 	if err != nil {
 		logger.Info("绑定参数失败" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -113,7 +116,7 @@ func (cm *configmap) CreateConfigmap(c *gin.Context) {
 		})
 		return
 	}
-	err = service.Configmaps.CreateCm(createingress)
+	err = service.Configmaps.CreateCm(params.Data)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"msg":  "创建 Configmap 失败",
@@ -124,5 +127,32 @@ func (cm *configmap) CreateConfigmap(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"msg": "创建 Configmap 成功",
+	})
+}
+
+// UpdateConfigmap 更新Configmap 资源
+func (cm *configmap) UpdateConfigmap(c *gin.Context) {
+	params := new(struct {
+		Namespace string            `json:"namespace"`
+		Data      *corev1.ConfigMap `json:"data"`
+	})
+	err := c.ShouldBindJSON(&params)
+	if err != nil {
+		logger.Info("绑定参数失败" + err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"msg": "绑定参数失败",
+		})
+		return
+	}
+	err = service.Configmaps.UpdateCm(params.Namespace, params.Data)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"msg": "更新 Configmap 失败",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"msg": "更新 Configmap 成功",
 	})
 }

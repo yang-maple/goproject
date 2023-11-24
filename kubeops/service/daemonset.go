@@ -3,56 +3,64 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/wonderivan/logger"
 	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"kubeops/model"
 )
 
-var Daemonset daemonset
+var DaemonSet daemonSet
 
-type daemonset struct{}
+type daemonSet struct{}
 
-type Dsdp struct {
+type DaemonDp struct {
 	Name  string `json:"name"`
 	Total int    `json:"total"`
 }
 
 type DsResp struct {
-	Total int                `json:"total"`
-	Item  []appsv1.DaemonSet `json:"item"`
+	Total int          `json:"total"`
+	Item  []daemonInfo `json:"item"`
 }
 
-// 数据类型转换
-// daemonsetcell to datacell
+type daemonInfo struct {
+	Name       string            `json:"name"`
+	Namespaces string            `json:"namespaces"`
+	Image      []string          `json:"image"`
+	Labels     map[string]string `json:"labels"`
+	Pods       string            `json:"pods"`
+	Age        string            `json:"age"`
+	Status     string            `json:"status"`
+}
 
-func (d *daemonset) todatacell(daemonsets []appsv1.DaemonSet) []DataCell {
-	cells := make([]DataCell, len(daemonsets))
-	for i := range daemonsets {
-		cells[i] = daemonsetCell(daemonsets[i])
+// toCell 数据类型转换 from daemonCell to dataCell
+func (d *daemonSet) toCell(daemonSets []appsv1.DaemonSet) []DataCell {
+	cells := make([]DataCell, len(daemonSets))
+	for i := range daemonSets {
+		cells[i] = daemonsetCell(daemonSets[i])
 	}
 	return cells
 }
 
-// datacell to daemonsetcell
-func (d *daemonset) fromdatacell(cells []DataCell) []appsv1.DaemonSet {
-	daemonsets := make([]appsv1.DaemonSet, len(cells))
+// fromCell 数据类型转换 from dataCell to daemonCell
+func (d *daemonSet) fromCell(cells []DataCell) []appsv1.DaemonSet {
+	daemonSets := make([]appsv1.DaemonSet, len(cells))
 	for i := range cells {
-		daemonsets[i] = appsv1.DaemonSet(cells[i].(daemonsetCell))
+		daemonSets[i] = appsv1.DaemonSet(cells[i].(daemonsetCell))
 	}
-	return daemonsets
+	return daemonSets
 }
 
-// 列表
-func (d *daemonset) GetDsList(DsName, Namespace string, Limit, Page int) (DP *DsResp, err error) {
+// GetDsList 列表
+func (d *daemonSet) GetDsList(DsName, Namespace string, Limit, Page int) (DP *DsResp, err error) {
 	//获取deployment 的所有清单列表
-	dslist, err := K8s.Clientset.AppsV1().DaemonSets(Namespace).List(context.TODO(), metav1.ListOptions{})
+	daemonList, err := K8s.Clientset.AppsV1().DaemonSets(Namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		logger.Info("获取daemonsetlist 失败" + err.Error())
+		logger.Info("获取 daemonSetList 失败" + err.Error())
 	}
 	//组装数据
-	selectdata := &dataselector{
-		GenericDataList: d.todatacell(dslist.Items),
+	selectData := &dataselector{
+		GenericDataList: d.toCell(daemonList.Items),
 		DataSelect: &DataSelectQuery{
 			Filter: &FilterQuery{DsName},
 			Paginate: &PaginateQuery{
@@ -62,22 +70,36 @@ func (d *daemonset) GetDsList(DsName, Namespace string, Limit, Page int) (DP *Ds
 		},
 	}
 	//先过滤 后排序
-	filtered := selectdata.Filter()
+	filtered := selectData.Filter()
 	total := len(filtered.GenericDataList)
 	//分页
-	datapage := filtered.Sort().Pagination()
-	dss := d.fromdatacell(datapage.GenericDataList)
+	dataPage := filtered.Sort().Pagination()
+	dss := d.fromCell(dataPage.GenericDataList)
+	item := make([]daemonInfo, 0, total)
 	for _, v := range dss {
-		fmt.Println(v.Name, v.CreationTimestamp.Time)
+		images := make([]string, 0, len(v.Spec.Template.Spec.Containers))
+		for _, im := range v.Spec.Template.Spec.Containers {
+			images = append(images, im.Image)
+		}
+		pods, status := model.GetStatus(v.Status.DesiredNumberScheduled, v.Status.NumberReady)
+		item = append(item, daemonInfo{
+			Name:       v.Name,
+			Namespaces: v.Namespace,
+			Image:      images,
+			Labels:     v.Labels,
+			Pods:       pods,
+			Age:        model.GetAge(v.CreationTimestamp.Unix()),
+			Status:     status,
+		})
 	}
 	return &DsResp{
 		Total: total,
-		Item:  dss,
+		Item:  item,
 	}, err
 }
 
-// 获取详情
-func (d *daemonset) GetDsDetal(Namespace, DsName string) (detail *appsv1.DaemonSet, err error) {
+// GetDsDetail  获取详情
+func (d *daemonSet) GetDsDetail(Namespace, DsName string) (detail *appsv1.DaemonSet, err error) {
 	//获取deploy
 	detail, err = K8s.Clientset.AppsV1().DaemonSets(Namespace).Get(context.TODO(), DsName, metav1.GetOptions{})
 	if err != nil {
@@ -87,8 +109,8 @@ func (d *daemonset) GetDsDetal(Namespace, DsName string) (detail *appsv1.DaemonS
 	return detail, nil
 }
 
-// 删除
-func (d *daemonset) DelDs(Namespace, DsName string) (err error) {
+// DelDs 删除
+func (d *daemonSet) DelDs(Namespace, DsName string) (err error) {
 	err = K8s.Clientset.AppsV1().DaemonSets(Namespace).Delete(context.TODO(), DsName, metav1.DeleteOptions{})
 	if err != nil {
 		logger.Info("删除实例失败" + err.Error())
@@ -97,12 +119,12 @@ func (d *daemonset) DelDs(Namespace, DsName string) (err error) {
 	return nil
 }
 
-// 更新
-func (d *daemonset) UpdataDs(Namespace string, ds *appsv1.DaemonSet) (err error) {
+// UpdateDs 更新
+func (d *daemonSet) UpdateDs(Namespace string, ds *appsv1.DaemonSet) (err error) {
 	_, err = K8s.Clientset.AppsV1().DaemonSets(Namespace).Update(context.TODO(), ds, metav1.UpdateOptions{})
 	if err != nil {
-		logger.Info("daemonset 更新失败" + err.Error())
-		return errors.New("daemonset 更新失败" + err.Error())
+		logger.Info("daemonSet 更新失败" + err.Error())
+		return errors.New("daemonSet 更新失败" + err.Error())
 	}
 
 	return nil

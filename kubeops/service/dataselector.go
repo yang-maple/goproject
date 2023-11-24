@@ -17,16 +17,16 @@ type dataselector struct {
 	DataSelect      *DataSelectQuery
 }
 
-// 接口用于各种资源list 的类型转换，转化后可以使用dataselector 的排序过滤分页
+// DataCell 接口用于各种资源list 的类型转换，转化后可以使用dataselector 的排序过滤分页
 // 接口定义了 两个方法
 type DataCell interface {
-	//该方法用于获取资源的创建时间
+	// GetCreation 该方法用于获取资源的创建时间
 	GetCreation() time.Time
-	//改方法用于获取资源的Name
+	// GetName 改方法用于获取资源的Name
 	GetName() string
 }
 
-// 定义过滤和分页的结构体
+// DataSelectQuery 定义过滤和分页的结构体
 type DataSelectQuery struct {
 	// 该结构体类型为过滤
 	Filter *FilterQuery
@@ -34,18 +34,18 @@ type DataSelectQuery struct {
 	Paginate *PaginateQuery
 }
 
-// 通过Name 进行过滤
+// FilterQuery 通过Name 进行过滤
 type FilterQuery struct {
 	Name string
 }
 
-// 通过 limit 和page 进行分页 排序
+// PaginateQuery 通过 limit 和page 进行分页 排序
 type PaginateQuery struct {
 	limit int
 	page  int
 }
 
-// 实现自定义结构的排序，需要重写 Len，Swap，Less方法
+// Len 实现自定义结构的排序，需要重写 Len，Swap，Less方法
 // Len 方法重写 用于获取数组的长度
 func (d *dataselector) Len() int {
 	return len(d.GenericDataList)
@@ -63,13 +63,13 @@ func (d *dataselector) Less(i, j int) bool {
 	return b.Before(a)
 }
 
-// 重写 Len Swap Less 三个方法 使用sort.Sort 进行排序
+// Sort 重写 Len Swap Less 三个方法 使用sort.Sort 进行排序
 func (d *dataselector) Sort() *dataselector {
 	sort.Sort(d)
 	return d
 }
 
-// 过滤的方法 根据传输的 Name 参数进行过滤
+// Filter 过滤的方法 根据传输的 Name 参数进行过滤
 func (d *dataselector) Filter() *dataselector {
 	// 若传入的Name == nil 则返回所有的数据
 	if d.DataSelect.Filter.Name == "" {

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"github.com/wonderivan/logger"
 	"io"
 	corev1 "k8s.io/api/core/v1"
@@ -205,9 +204,7 @@ func (p *pod) CountPod() (total []Podnp, err error) {
 			Name:   namespace.Name,
 			Number: len(plist.Items),
 		}
-		fmt.Println(npm)
 		total = append(total, *npm)
 	}
-	fmt.Println(total)
 	return total, nil
 }
