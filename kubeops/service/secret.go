@@ -101,6 +101,8 @@ func (s *secret) GetSecretDetail(Namespace, secretName string) (detail *corev1.S
 		logger.Info("获取Secret 详情失败" + err.Error())
 		return nil, errors.New("获取Secret 详情失败" + err.Error())
 	}
+	detail.Kind = "Secret"
+	detail.APIVersion = "v1"
 	return detail, nil
 }
 

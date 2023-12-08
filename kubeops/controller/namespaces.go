@@ -13,8 +13,8 @@ type namespace struct{}
 
 var Namespace namespace
 
-func (n *namespace) GetNslist(c *gin.Context) {
-	data, err := service.Namespace.GetNslist()
+func (n *namespace) GetNsList(c *gin.Context) {
+	data, err := service.Namespace.GetNsList()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"msg":    "获取namespaces失败",

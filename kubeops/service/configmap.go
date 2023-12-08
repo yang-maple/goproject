@@ -99,6 +99,8 @@ func (c *configmap) GetCmDetail(Namespace, configName string) (detail *corev1.Co
 		logger.Info("获取configmap 详情失败" + err.Error())
 		return nil, errors.New("获取configmap 详情失败" + err.Error())
 	}
+	detail.Kind = "ConfigMap"
+	detail.APIVersion = "v1"
 	return detail, nil
 }
 

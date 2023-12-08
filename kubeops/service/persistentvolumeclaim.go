@@ -110,6 +110,8 @@ func (p *pvClaim) GetPVClaimDetail(Namespace, claimName string) (detail *corev1.
 		logger.Info("获取 PersistentVolumeClaims 详情失败" + err.Error())
 		return nil, err
 	}
+	detail.Kind = "PersistentVolumeClaim"
+	detail.APIVersion = "v1"
 	return detail, nil
 }
 

@@ -145,6 +145,8 @@ func (d *deployment) GetDeployDetail(Namespace, DeployName string) (detail *apps
 		logger.Info("获取deployment 详情失败" + err.Error())
 		return nil, errors.New("获取deployment 详情失败" + err.Error())
 	}
+	detail.Kind = "Deployment"
+	detail.APIVersion = "apps/v1"
 	return detail, nil
 }
 

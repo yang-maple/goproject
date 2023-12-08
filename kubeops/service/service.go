@@ -21,14 +21,14 @@ type svcResp struct {
 }
 
 type svcInfo struct {
-	Name       string             `json:"name"`
-	Namespace  string             `json:"namespace"`
-	Labels     map[string]string  `json:"labels"`
-	Type       corev1.ServiceType `json:"type"`
-	ClusterIp  string             `json:"cluster_ip"`
-	ExternalIp []string           `json:"external_ip"`
-	Port       string             `json:"port"`
-	Age        string             `json:"age"`
+	Name       string               `json:"name"`
+	Namespace  string               `json:"namespace"`
+	Labels     map[string]string    `json:"labels"`
+	Type       corev1.ServiceType   `json:"type"`
+	ClusterIp  string               `json:"cluster_ip"`
+	ExternalIp []string             `json:"external_ip"`
+	Port       []corev1.ServicePort `json:"port"`
+	Age        string               `json:"age"`
 }
 
 type CreateService struct {
@@ -44,6 +44,11 @@ type Port struct {
 	Protocol   corev1.Protocol `json:"protocol"`
 	TargetPort int32           `json:"target_port"`
 	NodePort   int32           `json:"node_port"`
+}
+
+type svcDetail struct {
+	Detail *corev1.Service `json:"detail"`
+	Age    string          `json:"age"`
 }
 
 // 数据类型转换 cells
@@ -92,6 +97,7 @@ func (s *service) GetSvcList(svcName, Namespace string, Limit, Page int) (DP *sv
 		externalIp := make([]string, 0)
 		for _, value := range v.Spec.ExternalIPs {
 			externalIp = append(externalIp, value)
+
 		}
 		item = append(item, svcInfo{
 			Name:       v.Name,
@@ -100,6 +106,7 @@ func (s *service) GetSvcList(svcName, Namespace string, Limit, Page int) (DP *sv
 			Type:       v.Spec.Type,
 			ClusterIp:  v.Spec.ClusterIP,
 			ExternalIp: externalIp,
+			Port:       v.Spec.Ports,
 			Age:        model.GetAge(v.CreationTimestamp.Unix()),
 		})
 	}
@@ -110,14 +117,19 @@ func (s *service) GetSvcList(svcName, Namespace string, Limit, Page int) (DP *sv
 }
 
 // GetSvcDetail 获取 services 详情
-func (s *service) GetSvcDetail(Namespace, svcName string) (detail *corev1.Service, err error) {
+func (s *service) GetSvcDetail(Namespace, svcName string) (*svcDetail, error) {
 	//获取deploy
-	detail, err = K8s.Clientset.CoreV1().Services(Namespace).Get(context.TODO(), svcName, metav1.GetOptions{})
+	detail, err := K8s.Clientset.CoreV1().Services(Namespace).Get(context.TODO(), svcName, metav1.GetOptions{})
 	if err != nil {
 		logger.Info("获取services 详情失败" + err.Error())
 		return nil, errors.New("获取services 详情失败" + err.Error())
 	}
-	return detail, nil
+	detail.Kind = "Service"
+	detail.APIVersion = "v1"
+	return &svcDetail{
+		Detail: detail,
+		Age:    model.GetAge(detail.CreationTimestamp.Unix()),
+	}, nil
 }
 
 // CreateSvc 创建 services

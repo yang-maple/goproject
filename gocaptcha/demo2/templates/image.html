@@ -1,0 +1,22 @@
+<!doctype html>
+<head><title>Captcha Example</title></head>
+<body>
+<script>
+    function setSrcQuery(e, q) {
+        var src  = e.src;
+        var p = src.indexOf('?');
+        if (p >= 0) {
+            src = src.substr(0, p);
+        }
+        e.src = src + "?" + q
+    }
+
+    function reload() {
+        setSrcQuery(document.getElementById('image'), "reload=" + (new Date()).getTime());
+        return false;
+    }
+</script>
+<form action="/process" method=post>
+    <p><img id=image src="/captcha/{{.CaptchaId}}.png" alt="Captcha image"></p>
+    <a href="#" onclick="reload()">Reload</a>
+</form>

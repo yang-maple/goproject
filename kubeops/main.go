@@ -15,13 +15,11 @@ func main() {
 	service.K8s.Init()
 	//初始化db
 	db.Init()
-	//验证生成token
-	//fmt.Println(utils.CreateJwtToken("root", "123456"))
 	//初始化 gin
 	r := gin.Default()
 	//使用全局中间件
 	r.Use(middle.CrosHandler()) //跨域中间件
-	//r.Use(middle.JwtAuth())     //jwt 验证中间件
+	r.Use(middle.JwtAuth())     //jwt 验证中间件
 	//初始化路由
 	controller.Router.InitApiRouter(r)
 	//启动ws 服务并监听 ws 端口

@@ -55,7 +55,6 @@ func (w *workflow) GetByIdDetail(id int) (workflow *model.Workflow, err error) {
 // GetById 获取单条数据
 func (w *workflow) GetById(id int) (data *model.Workflow, err error) {
 	var workflow model.Workflow
-	fmt.Println("~~~~~~~~~~~~~~~", id)
 	tx := db.GORM.Where("id = ?", id).First(&workflow)
 	fmt.Println(&workflow)
 	if tx.Error != nil && tx.Error.Error() != "record not found" {

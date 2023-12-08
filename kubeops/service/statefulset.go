@@ -105,6 +105,8 @@ func (s *statefulSet) GetStatefulDetail(Namespace, StsName string) (detail *apps
 		logger.Info("获取 stateful set 详情失败" + err.Error())
 		return nil, errors.New("获取 stateful set 详情失败" + err.Error())
 	}
+	detail.Kind = "StatefulSet"
+	detail.APIVersion = "apps/v1"
 	return detail, nil
 }
 

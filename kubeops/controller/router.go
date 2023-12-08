@@ -51,7 +51,7 @@ func (router *router) InitApiRouter(r *gin.Engine) {
 	}
 	v5 := r.Group("/v1/api/namespaces")
 	{
-		v5.GET("/list", Namespace.GetNslist)
+		v5.GET("/list", Namespace.GetNsList)
 		v5.GET("/detail", Namespace.GetNsDetail)
 		v5.DELETE("/delete", Namespace.DelNs)
 		v5.POST("/create", Namespace.CreateNs)
@@ -116,5 +116,11 @@ func (router *router) InitApiRouter(r *gin.Engine) {
 		v13.GET("/detail", Workflow.GetWorkflowDetail)
 		v13.DELETE("/delete", Workflow.DeleteWorkflow)
 		v13.POST("/create", Workflow.CreateWorkflow)
+	}
+	v14 := r.Group("/v1/api/login")
+	{
+		v14.GET("/captcha", Login.ImageId)
+		v14.GET("/captchaId/:captchaId", Login.CaptchaImage)
+		v14.POST("/user/verifyInfo", Login.VerifyInfo)
 	}
 }

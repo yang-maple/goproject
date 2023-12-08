@@ -43,9 +43,10 @@ func Init() {
 	GORM.DB().SetConnMaxLifetime(config.MaxLifeTime)
 	isInit = true
 	GORM.AutoMigrate(&model.Workflow{})
+	GORM.AutoMigrate(&model.User{})
 }
 
-// 关闭数据库连接
+// Close 关闭数据库连接
 func Close() error {
 	return GORM.Close()
 }

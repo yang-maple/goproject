@@ -16,12 +16,12 @@ type persistenvolume struct{}
 
 var Persistenvolume persistenvolume
 
-type pvlist struct {
+type pvList struct {
 	Total int      `json:"total"`
-	Item  []pvinfo `json:"item"`
+	Item  []pvInfo `json:"item"`
 }
 
-type pvinfo struct {
+type pvInfo struct {
 	Name          string                               `json:"name"`
 	Labels        map[string]string                    `json:"labels"`
 	Capacity      corev1.ResourceList                  `json:"capacity"`
@@ -34,6 +34,11 @@ type pvinfo struct {
 	Age           string                               `json:"age"`
 }
 
+type pvDetail struct {
+	Detail *corev1.PersistentVolume `json:"detail"`
+	Age    string                   `json:"age"`
+}
+
 type CreatePVConfig struct {
 	Name    string            `json:"name"`
 	Labels  map[string]string `json:"labels"`
@@ -44,57 +49,64 @@ type CreatePVConfig struct {
 }
 
 // GetPvList PersistentVolume列表
-func (p *persistenvolume) GetPvList() (*pvlist, error) {
+func (p *persistenvolume) GetPvList() (*pvList, error) {
 	pvs, err := K8s.Clientset.CoreV1().PersistentVolumes().List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		logger.Info("获取PersistentVolume 失败" + err.Error())
 		return nil, errors.New("获取PersistentVolume 失败" + err.Error())
 	}
-	item := make([]pvinfo, 0, len(pvs.Items))
+	item := make([]pvInfo, 0, len(pvs.Items))
 	for _, pv := range pvs.Items {
-		item = append(item, pvinfo{
+		item = append(item, pvInfo{
 			Name:          pv.Name,
 			Labels:        pv.Labels,
 			Capacity:      pv.Spec.Capacity,
 			AccessMode:    pv.Spec.AccessModes,
 			ReclaimPolicy: pv.Spec.PersistentVolumeReclaimPolicy,
 			Status:        pv.Status,
-			Claim:         getclaim(pv.Spec.ClaimRef),
+			Claim:         getClaim(pv.Spec.ClaimRef),
 			StorageClass:  pv.Spec.StorageClassName,
 			Age:           model.GetAge(pv.CreationTimestamp.Unix()),
 		})
 	}
-	return &pvlist{
+	return &pvList{
 		Total: len(pvs.Items),
 		Item:  item,
 	}, nil
 }
 
 // GetPvDetail 获取PersistentVolume 详情
-func (p *persistenvolume) GetPvDetail(PvName string) (detail *corev1.PersistentVolume, err error) {
+func (p *persistenvolume) GetPvDetail(PvName string) (*pvDetail, error) {
 	//获取deploy
-	detail, err = K8s.Clientset.CoreV1().PersistentVolumes().Get(context.TODO(), PvName, metav1.GetOptions{})
+	details, err := K8s.Clientset.CoreV1().PersistentVolumes().Get(context.TODO(), PvName, metav1.GetOptions{})
 	if err != nil {
 		logger.Info("获取PersistentVolume 详情失败" + err.Error())
 		return nil, errors.New("获取PersistentVolume 详情失败" + err.Error())
 	}
-	return detail, nil
+	details.Kind = "PersistentVolume"
+	details.APIVersion = "v1"
+	return &pvDetail{
+		Detail: details,
+		Age:    model.GetAge(details.CreationTimestamp.Unix()),
+	}, nil
 }
 
 // DelPv 删除 PersistentVolume
 func (p *persistenvolume) DelPv(PvName string) (err error) {
 	err = K8s.Clientset.CoreV1().PersistentVolumes().Delete(context.TODO(), PvName, metav1.DeleteOptions{})
 	if err != nil {
-		logger.Info("删除 Persistenvolume 详情失败" + err.Error())
-		return errors.New("删除 Persistenvolume 详情失败" + err.Error())
+		logger.Info("删除 PersistentVolumes 详情失败" + err.Error())
+		return errors.New("删除 PersistentVolumes 详情失败" + err.Error())
 	}
 	return nil
 }
 
 // CreatePv 创建 PersistentVolume
 func (p *persistenvolume) CreatePv(data *CreatePVConfig) (err error) {
-	var mode corev1.PersistentVolumeMode = corev1.PersistentVolumeFilesystem
-	createpv := &corev1.PersistentVolume{
+
+	mode := corev1.PersistentVolumeFilesystem
+
+	createPv := &corev1.PersistentVolume{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   data.Name,
 			Labels: data.Labels,
@@ -114,19 +126,19 @@ func (p *persistenvolume) CreatePv(data *CreatePVConfig) (err error) {
 	}
 	switch data.Type {
 	case "NFS":
-		createpv.Spec.NFS = &corev1.NFSVolumeSource{
+		createPv.Spec.NFS = &corev1.NFSVolumeSource{
 			Server: data.Server,
 			Path:   data.Path,
 		}
-		createpv.Spec.StorageClassName = "nfs-client"
+		createPv.Spec.StorageClassName = "nfs-client"
 	case "HostPATH":
-		createpv.Spec.HostPath = &corev1.HostPathVolumeSource{
+		createPv.Spec.HostPath = &corev1.HostPathVolumeSource{
 			Path: data.Path,
 			Type: nil,
 		}
-		createpv.Spec.StorageClassName = "standard"
+		createPv.Spec.StorageClassName = "standard"
 	}
-	_, err = K8s.Clientset.CoreV1().PersistentVolumes().Create(context.TODO(), createpv, metav1.CreateOptions{})
+	_, err = K8s.Clientset.CoreV1().PersistentVolumes().Create(context.TODO(), createPv, metav1.CreateOptions{})
 	if err != nil {
 		logger.Info("创建 PersistentVolume 失败" + err.Error())
 		return errors.New("创建 PersistentVolume 失败" + err.Error())
@@ -145,9 +157,9 @@ func (p *persistenvolume) UpdatePv(deploy *corev1.PersistentVolume) (err error) 
 }
 
 // 获取 claim 参数
-func getclaim(claimref *corev1.ObjectReference) string {
-	if claimref != nil {
-		return claimref.Namespace + "/" + claimref.Name
+func getClaim(claimRef *corev1.ObjectReference) string {
+	if claimRef != nil {
+		return claimRef.Namespace + "/" + claimRef.Name
 	}
 	return ""
 }

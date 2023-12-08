@@ -16,7 +16,7 @@ var Pod pod
 
 type pod struct {
 }
-type Podnp struct {
+type podNp struct {
 	Name   string
 	Number int
 }
@@ -116,6 +116,8 @@ func (p *pod) GetPodDetail(Name, Namespace string) (pod *corev1.Pod, err error) 
 		logger.Info("获取pod 详情失败" + err.Error())
 		return nil, errors.New("获取pod 详情失败")
 	}
+	podDetail.Kind = "Pod"
+	podDetail.APIVersion = "v1"
 	return podDetail, nil
 }
 
@@ -172,7 +174,12 @@ func (p *pod) GetContainerLog(podName, containerName, namespaces string) (log st
 		return "", errors.New("获取pod-log 失败")
 	}
 	//延时关闭
-	defer podLog.Close()
+	defer func(podLog io.ReadCloser) {
+		err := podLog.Close()
+		if err != nil {
+
+		}
+	}(podLog)
 	//将response.body 写入缓冲区，用于转化成string 类型
 	buf := new(bytes.Buffer)
 	_, err = io.Copy(buf, podLog)
@@ -184,7 +191,7 @@ func (p *pod) GetContainerLog(podName, containerName, namespaces string) (log st
 }
 
 // CountPod  获取每个namespace 下pod的数量
-func (p *pod) CountPod() (total []Podnp, err error) {
+func (p *pod) CountPod() (total []podNp, err error) {
 	//获取所有的namespaces
 	namespaceList, err := K8s.Clientset.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
@@ -200,7 +207,7 @@ func (p *pod) CountPod() (total []Podnp, err error) {
 			return nil, errors.New("获取namespace下plist 列表失败")
 		}
 		//组装数据
-		npm := &Podnp{
+		npm := &podNp{
 			Name:   namespace.Name,
 			Number: len(plist.Items),
 		}

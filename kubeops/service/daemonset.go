@@ -106,6 +106,8 @@ func (d *daemonSet) GetDsDetail(Namespace, DsName string) (detail *appsv1.Daemon
 		logger.Info("获取deployment 详情失败" + err.Error())
 		return nil, errors.New("获取deployment 详情失败" + err.Error())
 	}
+	detail.Kind = "DaemonSet"
+	detail.APIVersion = "apps/v1"
 	return detail, nil
 }
 

@@ -114,6 +114,8 @@ func (i *ingress) GetIngDetail(Namespace, ingName string) (detail *networkv1.Ing
 		logger.Info("获取ingress 详情失败" + err.Error())
 		return nil, errors.New("获取ingress 详情失败" + err.Error())
 	}
+	detail.Kind = "Ingress"
+	detail.APIVersion = "networking.k8s.io/v1"
 	return detail, nil
 }
 
