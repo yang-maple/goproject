@@ -19,7 +19,7 @@ var CaptchaId string
 
 // CaptchaImage  根据id 获取验证码图片
 func (l *login) CaptchaImage(c *gin.Context) {
-	_ = serverHTTP(c.Writer, c.Request, CaptchaId, ".png", "zh", false, 100, 32)
+	_ = serverHTTP(c.Writer, c.Request, CaptchaId, ".png", "zh", false, 120, 32)
 }
 
 // ImageId 获取验证码图片id
@@ -38,7 +38,7 @@ func (l *login) VerifyInfo(c *gin.Context) {
 		logger.Info("绑定参数失败" + err.Error())
 	}
 	if !captcha.VerifyString(param.CaptchaId, param.CaptchaSolution) {
-		c.JSON(http.StatusOK, gin.H{
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "验证码错误",
 			"token": "",
 		})
@@ -49,6 +49,7 @@ func (l *login) VerifyInfo(c *gin.Context) {
 				"error": err.Error(),
 				"token": nil,
 			})
+			return
 		}
 		c.JSON(http.StatusOK, gin.H{
 			"error": nil,
