@@ -1,0 +1,8 @@
+github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
+github.com/gunsluo/goews/v2 v2.1.0 h1:XpblOSwgo3mmQlYGvdToDZuRUBFwt5mAPrBBfzhyz4w=
+github.com/gunsluo/goews/v2 v2.1.0/go.mod h1:uHAv4GdnntoK8+O5TpVZnkK01iaTsT6cNSxo8I+P7q8=
+github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
+github.com/stretchr/testify v1.7.2 h1:4jaiDzPyXQvSd7D0EjG45355tLlV3VOECpq10pLC+8s=
+github.com/vadimi/go-ntlm v1.2.1 h1:y2xZf/a5+BJlYNJIIulP1q8F438H9bU7aGcYE53vghQ=
+github.com/vadimi/go-ntlm v1.2.1/go.mod h1:hPTY60eLSKGj9oUJAB+kZiLs2Cg5eKdH60aLczM9rMg=
+gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=

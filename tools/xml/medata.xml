@@ -1,0 +1,34 @@
+<samlp:Response>
+    <saml:Issuer>...</saml:Issuer>
+    <ds:Signature>
+        ...
+    </ds:Signature>
+    <samlp:Status>
+        ...
+    </samlp:Status>
+    <saml:Assertion>
+        <saml:Issuer>...</saml:Issuer>
+        <saml:Subject>
+            <saml:NameID>${NameID}</saml:NameID>
+            <saml:SubjectConfirmation>
+                ...
+            </saml:SubjectConfirmation>
+        </saml:Subject>
+        <saml:Conditions>
+            <saml:AudienceRestriction>
+                <saml:Audience>${Audience}</saml:Audience>
+            </saml:AudienceRestriction>
+        </saml:Conditions>
+        <saml:AuthnStatement>
+            ...
+        </saml:AuthnStatement>
+        <saml:AttributeStatement>
+            <saml:Attribute Name="https://cloud.tencent.com/SAML/Attributes/RoleSessionName">
+                <AttributeValue>userName</AttributeValue>
+            </saml:Attribute>
+            <saml:Attribute Name="https://cloud.tencent.com/SAML/Attributes/Role">
+                <AttributeValue>qcs::cam::uin/{AccountID}:roleName/{RoleName1},qcs::cam::uin/{AccountID}:saml-provider/{ProviderName1}</AttributeValue>
+            </saml:Attribute>
+        </saml:AttributeStatement>
+    </saml:Assertion>
+</samlp:Response>

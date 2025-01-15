@@ -1,0 +1,94 @@
+<!--<!DOCTYPE html>-->
+<!--<html>-->
+<!--<head>-->
+<!--    <title>Home</title>-->
+<!--    <style>-->
+<!--        body {-->
+<!--            font-family: Arial, sans-serif;-->
+<!--            text-align: center;-->
+<!--            padding: 50px;-->
+<!--        }-->
+<!--        h1 {-->
+<!--            color: #333;-->
+<!--        }-->
+<!--        p {-->
+<!--            color: #666;-->
+<!--        }-->
+<!--        .welcome-message {-->
+<!--            margin-bottom: 20px;-->
+<!--        }-->
+<!--        .user-info {-->
+<!--            font-weight: bold;-->
+<!--        }-->
+<!--        .logout-button {-->
+<!--            background-color: #333;-->
+<!--            color: #fff;-->
+<!--            padding: 10px 20px;-->
+<!--            border: none;-->
+<!--            border-radius: 4px;-->
+<!--            cursor: pointer;-->
+<!--        }-->
+<!--        .logout-button:hover {-->
+<!--            background-color: #666;-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="welcome-message">-->
+<!--    <h1>Welcome to our website!</h1>-->
+<!--    <p class="user-info">Hello, {{ .username }}!</p>-->
+<!--    <p>{{ .xml }}</p>-->
+<!--</div>-->
+<!--<a href="/sso/saml/login" class="logout-button">Logout</a>-->
+<!--</body>-->
+<!--</html>-->
+
+<!--<!DOCTYPE html>-->
+<!--<html>-->
+<!--<head>-->
+<!--    &lt;!&ndash; 注意：这里我们不使用meta刷新，因为我们想要通过表单提交 &ndash;&gt;-->
+<!--</head>-->
+<!--<body>-->
+<!--<form action="https://signin.aliyun.com/saml/SSO" method="post" id="myForm">-->
+<!--    &lt;!&ndash; 在这里添加你的表单字段，例如：&ndash;&gt;-->
+<!--    <input type="hidden" name="someData" value="someValue" />-->
+<!--    &lt;!&ndash; 其他输入字段... &ndash;&gt;-->
+
+<!--    &lt;!&ndash; 注意：由于我们想要自动提交表单，而不是让用户点击按钮，-->
+<!--         我们可以使用JavaScript在页面加载时自动提交表单 &ndash;&gt;-->
+<!--    <script>-->
+<!--        window.onload = function() {-->
+<!--            // 在这里可以添加一些逻辑，比如倒计时-->
+<!--            // 但为了简单起见，我们直接提交表单-->
+<!--            document.getElementById('myForm').submit();-->
+<!--        };-->
+<!--    </script>-->
+
+<!--    &lt;!&ndash; 注意：如果你想要一个视觉上的提示，可以添加一个隐藏的提交按钮，-->
+<!--         但在这个例子中，我们不显示它 &ndash;&gt;-->
+<!--    &lt;!&ndash; <input type="submit" value="Submit" style="display:none;" /> &ndash;&gt;-->
+<!--</form>-->
+
+<!--&lt;!&ndash; 由于表单将立即提交，以下文本将不会被用户看到 &ndash;&gt;-->
+<!--<p style="display:none;">页面将通过POST请求重定向到example.com。</p>-->
+<!--</body>-->
+<!--</html>-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>XML Redirect</title>
+
+</head>
+<body>
+<form action="https://signin.aliyun.com/saml/SSO" method="post" id="myForm">
+    <input type="hidden" name="SAMLResponse" value="{{ .xml }}" />
+    <input type="hidden" name="RelayState" value="{{ .relay }}" />
+</form>
+<script>
+    var form = document.getElementById('myForm');
+    form.submit();
+</script>
+</body>
+</html>

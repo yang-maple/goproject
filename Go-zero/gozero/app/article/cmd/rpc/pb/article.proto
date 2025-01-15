@@ -1,0 +1,833 @@
+syntax = "proto3";
+
+option go_package ="./pb";
+
+package pb;
+
+// ------------------------------------ 
+// Messages
+// ------------------------------------ 
+
+//--------------------------------addrs--------------------------------
+message Addrs {
+  int64 id = 1; //id
+  int64 createdAt = 2; //createdAt
+  int64 updatedAt = 3; //updatedAt
+  int64 deletedAt = 4; //deletedAt
+  string country = 5; //country
+  string city = 6; //city
+}
+
+message AddAddrsReq {
+  int64 createdAt = 1; //createdAt
+  int64 updatedAt = 2; //updatedAt
+  int64 deletedAt = 3; //deletedAt
+  string country = 4; //country
+  string city = 5; //city
+}
+
+message AddAddrsResp {
+}
+
+message UpdateAddrsReq {
+  int64 id = 1; //id
+  int64 createdAt = 2; //createdAt
+  int64 updatedAt = 3; //updatedAt
+  int64 deletedAt = 4; //deletedAt
+  string country = 5; //country
+  string city = 6; //city
+}
+
+message UpdateAddrsResp {
+}
+
+message DelAddrsReq {
+  int64 id = 1; //id
+}
+
+message DelAddrsResp {
+}
+
+message GetAddrsByIdReq {
+  int64 id = 1; //id
+}
+
+message GetAddrsByIdResp {
+  Addrs addrs = 1; //addrs
+}
+
+message SearchAddrsReq {
+  int64 page = 1; //page
+  int64 limit = 2; //limit
+  int64 id = 3; //id
+  int64 createdAt = 4; //createdAt
+  int64 updatedAt = 5; //updatedAt
+  int64 deletedAt = 6; //deletedAt
+  string country = 7; //country
+  string city = 8; //city
+}
+
+message SearchAddrsResp {
+  repeated Addrs addrs = 1; //addrs
+}
+
+//--------------------------------alerts--------------------------------
+message Alerts {
+  int64 id = 1; //id
+  int64 createdAt = 2; //createdAt
+  string description = 3; //description
+  string summary = 4; //summary
+  string alertname = 5; //alertname
+  string instance = 6; //instance
+  string ip = 7; //ip
+  string job = 8; //job
+  string region = 9; //region
+  string severity = 10; //severity
+  string port = 11; //port
+  string status = 12; //status
+}
+
+message AddAlertsReq {
+  int64 createdAt = 1; //createdAt
+  string description = 2; //description
+  string summary = 3; //summary
+  string alertname = 4; //alertname
+  string instance = 5; //instance
+  string ip = 6; //ip
+  string job = 7; //job
+  string region = 8; //region
+  string severity = 9; //severity
+  string port = 10; //port
+  string status = 11; //status
+}
+
+message AddAlertsResp {
+}
+
+message UpdateAlertsReq {
+  int64 id = 1; //id
+  int64 createdAt = 2; //createdAt
+  string description = 3; //description
+  string summary = 4; //summary
+  string alertname = 5; //alertname
+  string instance = 6; //instance
+  string ip = 7; //ip
+  string job = 8; //job
+  string region = 9; //region
+  string severity = 10; //severity
+  string port = 11; //port
+  string status = 12; //status
+}
+
+message UpdateAlertsResp {
+}
+
+message DelAlertsReq {
+  int64 id = 1; //id
+}
+
+message DelAlertsResp {
+}
+
+message GetAlertsByIdReq {
+  int64 id = 1; //id
+}
+
+message GetAlertsByIdResp {
+  Alerts alerts = 1; //alerts
+}
+
+message SearchAlertsReq {
+  int64 page = 1; //page
+  int64 limit = 2; //limit
+  int64 id = 3; //id
+  int64 createdAt = 4; //createdAt
+  string description = 5; //description
+  string summary = 6; //summary
+  string alertname = 7; //alertname
+  string instance = 8; //instance
+  string ip = 9; //ip
+  string job = 10; //job
+  string region = 11; //region
+  string severity = 12; //severity
+  string port = 13; //port
+  string status = 14; //status
+}
+
+message SearchAlertsResp {
+  repeated Alerts alerts = 1; //alerts
+}
+
+//--------------------------------article--------------------------------
+message Article {
+  int64 id = 1; //id
+  string title = 2; //title
+  string content = 3; //content
+}
+
+message AddArticleReq {
+  string title = 1; //title
+  string content = 2; //content
+}
+
+message AddArticleResp {
+
+}
+
+message UpdateArticleReq {
+  int64 id = 1; //id
+  string title = 2; //title
+  string content = 3; //content
+}
+
+message UpdateArticleResp {
+}
+
+message DelArticleReq {
+  int64 id = 1; //id
+}
+
+message DelArticleResp {
+}
+
+message GetArticleByIdReq {
+  int64 id = 1; //id
+}
+
+message GetArticleByIdResp {
+  Article article = 1; //article
+}
+
+message SearchArticleReq {
+  int64 page = 1; //page
+  int64 limit = 2; //limit
+  int64 id = 3; //id
+  string title = 4; //title
+  string content = 5; //content
+}
+
+message SearchArticleResp {
+  repeated Article article = 1; //article
+}
+
+//--------------------------------class--------------------------------
+message Class {
+  int64 classid = 1; //classid
+  int64 classnum = 2; //classnum
+  string classcourse = 3; //classcourse
+}
+
+message AddClassReq {
+  int64 classid = 1; //classid
+  int64 classnum = 2; //classnum
+  string classcourse = 3; //classcourse
+}
+
+message AddClassResp {
+}
+
+message UpdateClassReq {
+  int64 classid = 1; //classid
+  int64 classnum = 2; //classnum
+  string classcourse = 3; //classcourse
+}
+
+message UpdateClassResp {
+}
+
+message DelClassReq {
+  int64 id = 1; //id
+}
+
+message DelClassResp {
+}
+
+message GetClassByIdReq {
+  int64 id = 1; //id
+}
+
+message GetClassByIdResp {
+  Class class = 1; //class
+}
+
+message SearchClassReq {
+  int64 page = 1; //page
+  int64 limit = 2; //limit
+  int64 classid = 3; //classid
+  int64 classnum = 4; //classnum
+  string classcourse = 5; //classcourse
+}
+
+message SearchClassResp {
+  repeated Class class = 1; //class
+}
+
+//--------------------------------clusterInfo--------------------------------
+message ClusterInfo {
+  int64 id = 1; //id
+  string clusterName = 2; //clusterName
+  string fileName = 3; //fileName
+  string type = 4; //type
+  string dir = 5; //dir
+  string userUuid = 6; //userUuid
+  int64 status = 7; //status
+  int64 createdAt = 8; //createdAt
+}
+
+message AddClusterInfoReq {
+  string clusterName = 1; //clusterName
+  string fileName = 2; //fileName
+  string type = 3; //type
+  string dir = 4; //dir
+  string userUuid = 5; //userUuid
+  int64 status = 6; //status
+  int64 createdAt = 7; //createdAt
+}
+
+message AddClusterInfoResp {
+}
+
+message UpdateClusterInfoReq {
+  int64 id = 1; //id
+  string clusterName = 2; //clusterName
+  string fileName = 3; //fileName
+  string type = 4; //type
+  string dir = 5; //dir
+  string userUuid = 6; //userUuid
+  int64 status = 7; //status
+  int64 createdAt = 8; //createdAt
+}
+
+message UpdateClusterInfoResp {
+}
+
+message DelClusterInfoReq {
+  int64 id = 1; //id
+}
+
+message DelClusterInfoResp {
+}
+
+message GetClusterInfoByIdReq {
+  int64 id = 1; //id
+}
+
+message GetClusterInfoByIdResp {
+  ClusterInfo clusterInfo = 1; //clusterInfo
+}
+
+message SearchClusterInfoReq {
+  int64 page = 1; //page
+  int64 limit = 2; //limit
+  int64 id = 3; //id
+  string clusterName = 4; //clusterName
+  string fileName = 5; //fileName
+  string type = 6; //type
+  string dir = 7; //dir
+  string userUuid = 8; //userUuid
+  int64 status = 9; //status
+  int64 createdAt = 10; //createdAt
+}
+
+message SearchClusterInfoResp {
+  repeated ClusterInfo clusterInfo = 1; //clusterInfo
+}
+
+//--------------------------------course--------------------------------
+message Course {
+  int64 id = 1; //id
+  string coursename = 2; //coursename
+}
+
+message AddCourseReq {
+  string coursename = 1; //coursename
+}
+
+message AddCourseResp {
+}
+
+message UpdateCourseReq {
+  int64 id = 1; //id
+  string coursename = 2; //coursename
+}
+
+message UpdateCourseResp {
+}
+
+message DelCourseReq {
+  int64 id = 1; //id
+}
+
+message DelCourseResp {
+}
+
+message GetCourseByIdReq {
+  int64 id = 1; //id
+}
+
+message GetCourseByIdResp {
+  Course course = 1; //course
+}
+
+message SearchCourseReq {
+  int64 page = 1; //page
+  int64 limit = 2; //limit
+  int64 id = 3; //id
+  string coursename = 4; //coursename
+}
+
+message SearchCourseResp {
+  repeated Course course = 1; //course
+}
+
+//--------------------------------Custer--------------------------------
+message Custer {
+  int64 Id = 1; //Id
+  string Name = 2; //鍚嶅瓧
+  int64 Age = 3; //骞撮緞
+  string Phone = 4; //鐢佃瘽
+  string Emil = 5; //閭欢
+  string City = 6; //鍩庡競
+}
+
+message AddCusterReq {
+  int64 Id = 1; //Id
+  string Name = 2; //鍚嶅瓧
+  int64 Age = 3; //骞撮緞
+  string Phone = 4; //鐢佃瘽
+  string Emil = 5; //閭欢
+  string City = 6; //鍩庡競
+}
+
+message AddCusterResp {
+}
+
+message UpdateCusterReq {
+  int64 Id = 1; //Id
+  string Name = 2; //鍚嶅瓧
+  int64 Age = 3; //骞撮緞
+  string Phone = 4; //鐢佃瘽
+  string Emil = 5; //閭欢
+  string City = 6; //鍩庡競
+}
+
+message UpdateCusterResp {
+}
+
+message DelCusterReq {
+  int64 id = 1; //id
+}
+
+message DelCusterResp {
+}
+
+message GetCusterByIdReq {
+  int64 id = 1; //id
+}
+
+message GetCusterByIdResp {
+  Custer custer = 1; //custer
+}
+
+message SearchCusterReq {
+  int64 page = 1; //page
+  int64 limit = 2; //limit
+  int64 Id = 3; //Id
+  string Name = 4; //鍚嶅瓧
+  int64 Age = 5; //骞撮緞
+  string Phone = 6; //鐢佃瘽
+  string Emil = 7; //閭欢
+  string City = 8; //鍩庡競
+}
+
+message SearchCusterResp {
+  repeated Custer custer = 1; //custer
+}
+
+//--------------------------------student--------------------------------
+message Student {
+  int64 id = 1; //id
+  string name = 2; //name
+  int64 class = 3; //class
+}
+
+message AddStudentReq {
+  string name = 1; //name
+  int64 class = 2; //class
+}
+
+message AddStudentResp {
+}
+
+message UpdateStudentReq {
+  int64 id = 1; //id
+  string name = 2; //name
+  int64 class = 3; //class
+}
+
+message UpdateStudentResp {
+}
+
+message DelStudentReq {
+  int64 id = 1; //id
+}
+
+message DelStudentResp {
+}
+
+message GetStudentByIdReq {
+  int64 id = 1; //id
+}
+
+message GetStudentByIdResp {
+  Student student = 1; //student
+}
+
+message SearchStudentReq {
+  int64 page = 1; //page
+  int64 limit = 2; //limit
+  int64 id = 3; //id
+  string name = 4; //name
+  int64 class = 5; //class
+}
+
+message SearchStudentResp {
+  repeated Student student = 1; //student
+}
+
+//--------------------------------studentCourse--------------------------------
+message StudentCourse {
+  int64 studentId = 1; //studentId
+  int64 courseId = 2; //courseId
+}
+
+message AddStudentCourseReq {
+  int64 studentId = 1; //studentId
+  int64 courseId = 2; //courseId
+}
+
+message AddStudentCourseResp {
+}
+
+message UpdateStudentCourseReq {
+  int64 studentId = 1; //studentId
+  int64 courseId = 2; //courseId
+}
+
+message UpdateStudentCourseResp {
+}
+
+message DelStudentCourseReq {
+  int64 id = 1; //id
+}
+
+message DelStudentCourseResp {
+}
+
+message GetStudentCourseByIdReq {
+  int64 id = 1; //id
+}
+
+message GetStudentCourseByIdResp {
+  StudentCourse studentCourse = 1; //studentCourse
+}
+
+message SearchStudentCourseReq {
+  int64 page = 1; //page
+  int64 limit = 2; //limit
+  int64 studentId = 3; //studentId
+  int64 courseId = 4; //courseId
+}
+
+message SearchStudentCourseResp {
+  repeated StudentCourse studentCourse = 1; //studentCourse
+}
+
+//--------------------------------tasks--------------------------------
+message Tasks {
+  int64 id = 1; //id
+  string title = 2; //title
+  int64 completed = 3; //completed
+}
+
+message AddTasksReq {
+  string title = 1; //title
+  int64 completed = 2; //completed
+}
+
+message AddTasksResp {
+}
+
+message UpdateTasksReq {
+  int64 id = 1; //id
+  string title = 2; //title
+  int64 completed = 3; //completed
+}
+
+message UpdateTasksResp {
+}
+
+message DelTasksReq {
+  int64 id = 1; //id
+}
+
+message DelTasksResp {
+}
+
+message GetTasksByIdReq {
+  int64 id = 1; //id
+}
+
+message GetTasksByIdResp {
+  Tasks tasks = 1; //tasks
+}
+
+message SearchTasksReq {
+  int64 page = 1; //page
+  int64 limit = 2; //limit
+  int64 id = 3; //id
+  string title = 4; //title
+  int64 completed = 5; //completed
+}
+
+message SearchTasksResp {
+  repeated Tasks tasks = 1; //tasks
+}
+
+//--------------------------------userInfo--------------------------------
+message UserInfo {
+  string uuid = 1; //uuid
+  string username = 2; //username
+  string password = 3; //password
+  string email = 4; //email
+  string roles = 5; //roles
+  string avatar = 6; //avatar
+  int64 status = 7; //status
+  int64 createdAt = 8; //createdAt
+}
+
+message AddUserInfoReq {
+  string uuid = 1; //uuid
+  string username = 2; //username
+  string password = 3; //password
+  string email = 4; //email
+  string roles = 5; //roles
+  string avatar = 6; //avatar
+  int64 status = 7; //status
+  int64 createdAt = 8; //createdAt
+}
+
+message AddUserInfoResp {
+}
+
+message UpdateUserInfoReq {
+  string uuid = 1; //uuid
+  string username = 2; //username
+  string password = 3; //password
+  string email = 4; //email
+  string roles = 5; //roles
+  string avatar = 6; //avatar
+  int64 status = 7; //status
+  int64 createdAt = 8; //createdAt
+}
+
+message UpdateUserInfoResp {
+}
+
+message DelUserInfoReq {
+  int64 id = 1; //id
+}
+
+message DelUserInfoResp {
+}
+
+message GetUserInfoByIdReq {
+  int64 id = 1; //id
+}
+
+message GetUserInfoByIdResp {
+  UserInfo userInfo = 1; //userInfo
+}
+
+message SearchUserInfoReq {
+  int64 page = 1; //page
+  int64 limit = 2; //limit
+  string uuid = 3; //uuid
+  string username = 4; //username
+  string password = 5; //password
+  string email = 6; //email
+  string roles = 7; //roles
+  string avatar = 8; //avatar
+  int64 status = 9; //status
+  int64 createdAt = 10; //createdAt
+}
+
+message SearchUserInfoResp {
+  repeated UserInfo userInfo = 1; //userInfo
+}
+
+//--------------------------------workflow--------------------------------
+message Workflow {
+  int64 id = 1; //id
+  string name = 2; //name
+  string namespace = 3; //namespace
+  int64 replicas = 4; //replicas
+  string deployment = 5; //deployment
+  string service = 6; //service
+  string ingress = 7; //ingress
+  string type = 8; //type
+  int64 createdAt = 9; //createdAt
+  int64 updatedAt = 10; //updatedAt
+  int64 deletedAt = 11; //deletedAt
+}
+
+message AddWorkflowReq {
+  string name = 1; //name
+  string namespace = 2; //namespace
+  int64 replicas = 3; //replicas
+  string deployment = 4; //deployment
+  string service = 5; //service
+  string ingress = 6; //ingress
+  string type = 7; //type
+  int64 createdAt = 8; //createdAt
+  int64 updatedAt = 9; //updatedAt
+  int64 deletedAt = 10; //deletedAt
+}
+
+message AddWorkflowResp {
+}
+
+message UpdateWorkflowReq {
+  int64 id = 1; //id
+  string name = 2; //name
+  string namespace = 3; //namespace
+  int64 replicas = 4; //replicas
+  string deployment = 5; //deployment
+  string service = 6; //service
+  string ingress = 7; //ingress
+  string type = 8; //type
+  int64 createdAt = 9; //createdAt
+  int64 updatedAt = 10; //updatedAt
+  int64 deletedAt = 11; //deletedAt
+}
+
+message UpdateWorkflowResp {
+}
+
+message DelWorkflowReq {
+  int64 id = 1; //id
+}
+
+message DelWorkflowResp {
+}
+
+message GetWorkflowByIdReq {
+  int64 id = 1; //id
+}
+
+message GetWorkflowByIdResp {
+  Workflow workflow = 1; //workflow
+}
+
+message SearchWorkflowReq {
+  int64 page = 1; //page
+  int64 limit = 2; //limit
+  int64 id = 3; //id
+  string name = 4; //name
+  string namespace = 5; //namespace
+  int64 replicas = 6; //replicas
+  string deployment = 7; //deployment
+  string service = 8; //service
+  string ingress = 9; //ingress
+  string type = 10; //type
+  int64 createdAt = 11; //createdAt
+  int64 updatedAt = 12; //updatedAt
+  int64 deletedAt = 13; //deletedAt
+}
+
+message SearchWorkflowResp {
+  repeated Workflow workflow = 1; //workflow
+}
+
+
+
+// ------------------------------------ 
+// Rpc Func
+// ------------------------------------ 
+
+service article{ 
+
+	 //-----------------------addrs----------------------- 
+	 rpc AddAddrs(AddAddrsReq) returns (AddAddrsResp); 
+	 rpc UpdateAddrs(UpdateAddrsReq) returns (UpdateAddrsResp); 
+	 rpc DelAddrs(DelAddrsReq) returns (DelAddrsResp); 
+	 rpc GetAddrsById(GetAddrsByIdReq) returns (GetAddrsByIdResp); 
+	 rpc SearchAddrs(SearchAddrsReq) returns (SearchAddrsResp); 
+	 //-----------------------alerts----------------------- 
+	 rpc AddAlerts(AddAlertsReq) returns (AddAlertsResp); 
+	 rpc UpdateAlerts(UpdateAlertsReq) returns (UpdateAlertsResp); 
+	 rpc DelAlerts(DelAlertsReq) returns (DelAlertsResp); 
+	 rpc GetAlertsById(GetAlertsByIdReq) returns (GetAlertsByIdResp); 
+	 rpc SearchAlerts(SearchAlertsReq) returns (SearchAlertsResp); 
+	 //-----------------------article----------------------- 
+	 rpc AddArticle(AddArticleReq) returns (AddArticleResp); 
+	 rpc UpdateArticle(UpdateArticleReq) returns (UpdateArticleResp); 
+	 rpc DelArticle(DelArticleReq) returns (DelArticleResp); 
+	 rpc GetArticleById(GetArticleByIdReq) returns (GetArticleByIdResp); 
+	 rpc SearchArticle(SearchArticleReq) returns (SearchArticleResp); 
+	 //-----------------------class----------------------- 
+	 rpc AddClass(AddClassReq) returns (AddClassResp); 
+	 rpc UpdateClass(UpdateClassReq) returns (UpdateClassResp); 
+	 rpc DelClass(DelClassReq) returns (DelClassResp); 
+	 rpc GetClassById(GetClassByIdReq) returns (GetClassByIdResp); 
+	 rpc SearchClass(SearchClassReq) returns (SearchClassResp); 
+	 //-----------------------clusterInfo----------------------- 
+	 rpc AddClusterInfo(AddClusterInfoReq) returns (AddClusterInfoResp); 
+	 rpc UpdateClusterInfo(UpdateClusterInfoReq) returns (UpdateClusterInfoResp); 
+	 rpc DelClusterInfo(DelClusterInfoReq) returns (DelClusterInfoResp); 
+	 rpc GetClusterInfoById(GetClusterInfoByIdReq) returns (GetClusterInfoByIdResp); 
+	 rpc SearchClusterInfo(SearchClusterInfoReq) returns (SearchClusterInfoResp); 
+	 //-----------------------course----------------------- 
+	 rpc AddCourse(AddCourseReq) returns (AddCourseResp); 
+	 rpc UpdateCourse(UpdateCourseReq) returns (UpdateCourseResp); 
+	 rpc DelCourse(DelCourseReq) returns (DelCourseResp); 
+	 rpc GetCourseById(GetCourseByIdReq) returns (GetCourseByIdResp); 
+	 rpc SearchCourse(SearchCourseReq) returns (SearchCourseResp); 
+	 //-----------------------Custer----------------------- 
+	 rpc AddCuster(AddCusterReq) returns (AddCusterResp); 
+	 rpc UpdateCuster(UpdateCusterReq) returns (UpdateCusterResp); 
+	 rpc DelCuster(DelCusterReq) returns (DelCusterResp); 
+	 rpc GetCusterById(GetCusterByIdReq) returns (GetCusterByIdResp); 
+	 rpc SearchCuster(SearchCusterReq) returns (SearchCusterResp); 
+	 //-----------------------student----------------------- 
+	 rpc AddStudent(AddStudentReq) returns (AddStudentResp); 
+	 rpc UpdateStudent(UpdateStudentReq) returns (UpdateStudentResp); 
+	 rpc DelStudent(DelStudentReq) returns (DelStudentResp); 
+	 rpc GetStudentById(GetStudentByIdReq) returns (GetStudentByIdResp); 
+	 rpc SearchStudent(SearchStudentReq) returns (SearchStudentResp); 
+	 //-----------------------studentCourse----------------------- 
+	 rpc AddStudentCourse(AddStudentCourseReq) returns (AddStudentCourseResp); 
+	 rpc UpdateStudentCourse(UpdateStudentCourseReq) returns (UpdateStudentCourseResp); 
+	 rpc DelStudentCourse(DelStudentCourseReq) returns (DelStudentCourseResp); 
+	 rpc GetStudentCourseById(GetStudentCourseByIdReq) returns (GetStudentCourseByIdResp); 
+	 rpc SearchStudentCourse(SearchStudentCourseReq) returns (SearchStudentCourseResp); 
+	 //-----------------------tasks----------------------- 
+	 rpc AddTasks(AddTasksReq) returns (AddTasksResp); 
+	 rpc UpdateTasks(UpdateTasksReq) returns (UpdateTasksResp); 
+	 rpc DelTasks(DelTasksReq) returns (DelTasksResp); 
+	 rpc GetTasksById(GetTasksByIdReq) returns (GetTasksByIdResp); 
+	 rpc SearchTasks(SearchTasksReq) returns (SearchTasksResp); 
+	 //-----------------------userInfo----------------------- 
+	 rpc AddUserInfo(AddUserInfoReq) returns (AddUserInfoResp); 
+	 rpc UpdateUserInfo(UpdateUserInfoReq) returns (UpdateUserInfoResp); 
+	 rpc DelUserInfo(DelUserInfoReq) returns (DelUserInfoResp); 
+	 rpc GetUserInfoById(GetUserInfoByIdReq) returns (GetUserInfoByIdResp); 
+	 rpc SearchUserInfo(SearchUserInfoReq) returns (SearchUserInfoResp); 
+	 //-----------------------workflow----------------------- 
+	 rpc AddWorkflow(AddWorkflowReq) returns (AddWorkflowResp); 
+	 rpc UpdateWorkflow(UpdateWorkflowReq) returns (UpdateWorkflowResp); 
+	 rpc DelWorkflow(DelWorkflowReq) returns (DelWorkflowResp); 
+	 rpc GetWorkflowById(GetWorkflowByIdReq) returns (GetWorkflowByIdResp); 
+	 rpc SearchWorkflow(SearchWorkflowReq) returns (SearchWorkflowResp); 
+
+}

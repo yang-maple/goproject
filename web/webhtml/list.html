@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<!--用于主页面对信息进行展示-->
+<html>
+<head>
+    <title>用户信息</title>
+    <body>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>NAME</th>
+                    <th>STATUS</th>
+                </tr>
+            </thead>
+           <tbody>
+            {{ range . }}
+            <tr>
+                <td>{{ .ID }}</td>
+                <td>{{ .Name }}</td>
+                <td>{{ .Status }}</td>
+            </tr>
+            {{ end }}
+           </tbody>
+        </table>
+        <a href="modity">modity</a>
+
+    </body>
+</head>
+
+</html>

@@ -1,0 +1,23 @@
+syntax = "proto3";
+option go_package = "./;pb";
+
+service Compute {
+    rpc Area (AreaRequest) returns (AreaResponse) {}
+    rpc Perimeter (PerimeterRequest) returns (PerimeterResponse) {}
+}
+
+message AreaRequest {
+    float length = 1;
+    float width = 2;
+}
+message AreaResponse {
+    float area = 1;
+}
+
+message PerimeterRequest {
+    float length = 1;
+    float width = 2;
+}
+message PerimeterResponse {
+    float perimeter = 1;
+}

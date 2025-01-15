@@ -1,0 +1,15 @@
+Name: article-rpc #服务名称
+ListenOn: 127.0.0.1:2001 #监听地址
+Mode: dev #运行模式
+# 配置Redis
+Redis:
+  Host: 10.1.131.32:6379
+  Type: node
+  Pass: admin123
+  Key: article-rpc
+# 配置MySQL
+DB:
+  DataSource: root:123456@tcp(10.1.131.32:3306)/my_db?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+Cache:
+  - Host: 10.1.131.32:6379
+    Pass: admin123

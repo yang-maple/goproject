@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" entityID="http://127.0.0.1:8000/sso/saml/login">
+    <IDPSSODescriptor WantAuthnRequestsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+        <KeyDescriptor use="signing">
+            <ds:KeyInfo>
+                <ds:X509Data>
+                    <ds:X509Certificate>MIIDujCCAqKgAwIBAgIJAKtb15tbL/91MA0GCSqGSIb3DQEBCwUAMGsxCzAJBgNVBAYTAlhZMQwwCgYDVQQIDANYSVkxFTATBgNVBAcMDERlZmF1bHQgQ2l0eTEcMBoGA1UECgwTRGVmYXVsdCBDb21wYW55IEx0ZDEZMBcGCSqGSIb3DQEJARYKMTI0QHFxLmNvbTAeFw0yNDA1MjcwMzQ4MTBaFw0zNDA1MjUwMzQ4MTBaMGsxCzAJBgNVBAYTAlhZMQwwCgYDVQQIDANYSVkxFTATBgNVBAcMDERlZmF1bHQgQ2l0eTEcMBoGA1UECgwTRGVmYXVsdCBDb21wYW55IEx0ZDEZMBcGCSqGSIb3DQEJARYKMTI0QHFxLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANJsdxyh7TCX9lcTuV57B3D7wQ+nQ7cZSiW+pbwcti0gi/52KY+ebWP0DJGIWbz2z3OxhfkghhtK64Ex/TpdO3qzRAmgpsTBEJEegTDaU+4wJBqOPTsVf1/2gP+wjWZkYlC5Wmvx6juBBzcIlgAcDexzNWxNh+xBPy7agF7CNDYfBbvwLZv0cotNCmifL1vB4woxAUD62uKRBbCTlWWiZDccTk6c5ukgYdcUQSVshUpG4LNmR1/aFOGPC2fKmePilPVMYWDjfOdL9trmUuGB105jqI3IT9ulbu9P87K880YZZ+Wflc6B2bzfpjOpiu6DO6lPyGSpBGHPyezH9QQ2NkkCAwEAAaNhMF8wHQYDVR0OBBYEFG+7CWZYqOWEE4Lp6WPiDZ3/cWH5MB8GA1UdIwQYMBaAFG+7CWZYqOWEE4Lp6WPiDZ3/cWH5MA8GA1UdEQQIMAaHBAoBgx8wDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEAGzygfrxxUM4MVL3yWOSn4qW+FepdVxZtdckXeKcb9BB33O9VH1hXP3o1J26Pqnu6aKIA8xsEInMon2Z23SCeyufreUzaK1AIcSlN9z0LsTHt72kAAajmLuWUUkV40am4/uB6H2kM750Q1YIE45j2acJ/Rp1V2S6KEnXv8it6wLItLDhs3LUVRvjcm6gGaAgRevt6L2TH9zy4KdsWTfsi2OCMPQ9KDAxcILyP9ZCZT61ek84uH0fAlkmqisLwyyMyRAJ1Xf3UHVyuAFkj0dT2p2zl9vFiOQrz6G5BOWWCGApZlzxvvJuivN+mXA34c9GZ60M/nIhocSXDSPEtDMGNgQ==</ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+        </KeyDescriptor>
+        <KeyDescriptor use="encryption">
+            <ds:KeyInfo>
+                <ds:X509Data>
+                    <ds:X509Certificate>MIIDujCCAqKgAwIBAgIJAKtb15tbL/91MA0GCSqGSIb3DQEBCwUAMGsxCzAJBgNVBAYTAlhZMQwwCgYDVQQIDANYSVkxFTATBgNVBAcMDERlZmF1bHQgQ2l0eTEcMBoGA1UECgwTRGVmYXVsdCBDb21wYW55IEx0ZDEZMBcGCSqGSIb3DQEJARYKMTI0QHFxLmNvbTAeFw0yNDA1MjcwMzQ4MTBaFw0zNDA1MjUwMzQ4MTBaMGsxCzAJBgNVBAYTAlhZMQwwCgYDVQQIDANYSVkxFTATBgNVBAcMDERlZmF1bHQgQ2l0eTEcMBoGA1UECgwTRGVmYXVsdCBDb21wYW55IEx0ZDEZMBcGCSqGSIb3DQEJARYKMTI0QHFxLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANJsdxyh7TCX9lcTuV57B3D7wQ+nQ7cZSiW+pbwcti0gi/52KY+ebWP0DJGIWbz2z3OxhfkghhtK64Ex/TpdO3qzRAmgpsTBEJEegTDaU+4wJBqOPTsVf1/2gP+wjWZkYlC5Wmvx6juBBzcIlgAcDexzNWxNh+xBPy7agF7CNDYfBbvwLZv0cotNCmifL1vB4woxAUD62uKRBbCTlWWiZDccTk6c5ukgYdcUQSVshUpG4LNmR1/aFOGPC2fKmePilPVMYWDjfOdL9trmUuGB105jqI3IT9ulbu9P87K880YZZ+Wflc6B2bzfpjOpiu6DO6lPyGSpBGHPyezH9QQ2NkkCAwEAAaNhMF8wHQYDVR0OBBYEFG+7CWZYqOWEE4Lp6WPiDZ3/cWH5MB8GA1UdIwQYMBaAFG+7CWZYqOWEE4Lp6WPiDZ3/cWH5MA8GA1UdEQQIMAaHBAoBgx8wDAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEAGzygfrxxUM4MVL3yWOSn4qW+FepdVxZtdckXeKcb9BB33O9VH1hXP3o1J26Pqnu6aKIA8xsEInMon2Z23SCeyufreUzaK1AIcSlN9z0LsTHt72kAAajmLuWUUkV40am4/uB6H2kM750Q1YIE45j2acJ/Rp1V2S6KEnXv8it6wLItLDhs3LUVRvjcm6gGaAgRevt6L2TH9zy4KdsWTfsi2OCMPQ9KDAxcILyP9ZCZT61ek84uH0fAlkmqisLwyyMyRAJ1Xf3UHVyuAFkj0dT2p2zl9vFiOQrz6G5BOWWCGApZlzxvvJuivN+mXA34c9GZ60M/nIhocSXDSPEtDMGNgQ==</ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+        </KeyDescriptor>
+        <NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</NameIDFormat>
+        <SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="http://127.0.0.1:8000/sso/saml/login"/>
+        <SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="http://127.0.0.1:8000/sso/saml/login"/>
+    </IDPSSODescriptor>
+    <Organization>
+        <OrganizationName xml:lang="en">Mouse Tech</OrganizationName>
+        <OrganizationDisplayName xml:lang="en">Mouse Tech</OrganizationDisplayName>
+        <OrganizationURL xml:lang="en">http://127.0.0.1:8000</OrganizationURL>
+    </Organization>
+</EntityDescriptor>
+

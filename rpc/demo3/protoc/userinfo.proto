@@ -1,0 +1,36 @@
+syntax = "proto3"; // 表示使用的protobuf版本是proto3,不指定默认是proto2
+option go_package = "./;protoc"; //第一个分号表示路径，第二个分号表示包名
+message UserInfo {
+  //字符串类型
+  string UserName = 1;
+  //整型类型
+  int32 Age = 2;
+  //数组类型
+  repeated string hobby = 3;
+  //枚举类型
+  Sex Sex = 4;
+  //内嵌类型
+  Food Food = 5;
+  //内嵌套类型
+  message Address {
+    string Province = 1;
+    string City = 2;
+  }
+
+  // map类型
+  map<string, Address> address = 6;
+
+  map<string, int32> score = 7;
+
+}
+
+//枚举类型
+enum Sex {
+  Man = 0;
+  Woman = 1;
+}
+
+// 嵌套
+message Food {
+  string Name = 1;
+}

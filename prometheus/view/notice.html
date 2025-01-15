@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ . }}</title>
+</head>
+<body>
+<p> 事件编号 {{ .ID }} </p>
+<p> 告警事件 {{ .Alertname }}
+<p> 告警时间 {{ .CreatedAt }}</p>
+<p> IP {{ .Ip }} </p>
+<p> job {{ .Job }}</p>
+<p>  description {{ .Description }} </p>
+</body>
+</html>

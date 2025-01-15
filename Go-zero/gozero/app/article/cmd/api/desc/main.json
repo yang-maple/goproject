@@ -1,0 +1,240 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "文章服务",
+    "description": "文章服务",
+    "version": "v1"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/article/v1/createArticle": {
+      "post": {
+        "summary": "创建文章",
+        "operationId": "createArticle",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/CreateArticleResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateArticleReq"
+            }
+          }
+        ],
+        "tags": [
+          "article"
+        ]
+      }
+    },
+    "/article/v1/deleteArticle": {
+      "post": {
+        "summary": "删除文章",
+        "operationId": "deleteArticle",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/DeleteArticleResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeleteArticleReq"
+            }
+          }
+        ],
+        "tags": [
+          "article"
+        ]
+      }
+    },
+    "/article/v1/getArticles": {
+      "post": {
+        "summary": "获得文章列表",
+        "operationId": "getArticles",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/GetArticleListResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/GetArticleListReq"
+            }
+          }
+        ],
+        "tags": [
+          "article"
+        ]
+      }
+    },
+    "/article/v1/updateArticle": {
+      "post": {
+        "summary": "修改文章",
+        "operationId": "updateArticle",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/UpdateArticleResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateArticleReq"
+            }
+          }
+        ],
+        "tags": [
+          "article"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "Article": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "title": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        }
+      },
+      "title": "Article",
+      "required": [
+        "id",
+        "title",
+        "content"
+      ]
+    },
+    "CreateArticleReq": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        }
+      },
+      "title": "CreateArticleReq",
+      "required": [
+        "title",
+        "content"
+      ]
+    },
+    "CreateArticleResp": {
+      "type": "object",
+      "title": "CreateArticleResp"
+    },
+    "DeleteArticleReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "DeleteArticleReq",
+      "required": [
+        "id"
+      ]
+    },
+    "DeleteArticleResp": {
+      "type": "object",
+      "title": "DeleteArticleResp"
+    },
+    "GetArticleListReq": {
+      "type": "object",
+      "title": "GetArticleListReq"
+    },
+    "GetArticleListResp": {
+      "type": "object",
+      "properties": {
+        "Articles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Article"
+          }
+        }
+      },
+      "title": "GetArticleListResp",
+      "required": [
+        "Articles"
+      ]
+    },
+    "UpdateArticleReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "title": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        }
+      },
+      "title": "UpdateArticleReq",
+      "required": [
+        "id",
+        "title",
+        "content"
+      ]
+    },
+    "UpdateArticleResp": {
+      "type": "object",
+      "title": "UpdateArticleResp"
+    }
+  },
+  "securityDefinitions": {
+    "apiKey": {
+      "type": "apiKey",
+      "description": "Enter JWT Bearer token **_only_**",
+      "name": "Authorization",
+      "in": "header"
+    }
+  }
+}

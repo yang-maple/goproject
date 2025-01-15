@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+option go_package ="./pb";
+
+package pb;
+
+// ------------------------------------
+// Messages
+// ------------------------------------
+
+//--------------------------------article--------------------------------
+message Article {
+  int64 id = 1; //id
+  string title = 2; //title
+  string content = 3; //content
+}
+
+message AddArticleReq {
+  string title = 1; //title
+  string content = 2; //content
+}
+
+message AddArticleResp {
+  string message = 1;
+  int64  code = 2;
+  string data = 3;
+}
+
+message UpdateArticleReq {
+  int64 id = 1; //id
+  string title = 2; //title
+  string content = 3; //content
+}
+
+message UpdateArticleResp {
+  string message = 1;
+  int64  code = 2;
+  string data = 3;
+}
+
+message DelArticleReq {
+  int64 id = 1; //id
+}
+
+message DelArticleResp {
+  string message = 1;
+  int64  code = 2;
+  string data = 3;
+}
+
+message GetArticleByIdReq {
+  int64 id = 1; //id
+}
+
+message GetArticleByIdResp {
+  Article article = 1; //article
+}
+
+message SearchArticleReq {
+  int64 page = 1; //page
+  int64 limit = 2; //limit
+  int64 id = 3; //id
+  string title = 4; //title
+  string content = 5; //content
+}
+
+message SearchArticleResp {
+  repeated Article article = 1; //article
+}
+
+
+
+// ------------------------------------
+// Rpc Func
+// ------------------------------------
+
+service article{
+
+  //-----------------------article-----------------------
+  rpc AddArticle(AddArticleReq) returns (AddArticleResp);
+  rpc UpdateArticle(UpdateArticleReq) returns (UpdateArticleResp);
+  rpc DelArticle(DelArticleReq) returns (DelArticleResp);
+  rpc GetArticleById(GetArticleByIdReq) returns (GetArticleByIdResp);
+  rpc SearchArticle(SearchArticleReq) returns (SearchArticleResp);
+
+}
