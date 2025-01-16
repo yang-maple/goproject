@@ -1,0 +1,12 @@
+Name: article.rpc
+ListenOn: 0.0.0.0:8080
+
+Consul:
+  Host: 10.1.131.32:8500
+  Token: '74564183-951d-27e3-493e-bb57bfbb3892'
+  Key: add.rpc
+  Meta:
+    Protocol: grpc
+  Tag:
+    - tag
+    - rpc

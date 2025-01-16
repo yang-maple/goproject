@@ -1,0 +1,54 @@
+syntax = "v1"
+
+type LoginRequest {
+	UserName string `json:"userName"`
+	Password string `json:"password"`
+}
+
+type LoginResponse {
+	Code int    `json:"code"`
+	Data string `json:"data"`
+	Msg  string `json:"msg"`
+}
+
+type AddRequest {
+	UserName string `json:"userName"`
+	Password string `json:"password"`
+}
+
+type DeleteRequest {
+	Id int `path:"id"`
+}
+
+type UpdateRequest {
+	Id       int    `json:"id"`
+	UserName string `json:"userName"`
+	Password string `json:"password"`
+}
+
+type QueryRequest {
+	Id int `path:"id"`
+}
+
+service users {
+	@handler login
+	post /login (LoginRequest) returns (string)
+}
+
+@server (
+	jwt: Auth
+)
+service users {
+	@handler add
+	post /api/user/add (AddRequest) returns (string)
+
+	@handler delete
+	delete /api/user/delete/:id (DeleteRequest) returns (string)
+
+	@handler update
+	put /api/user/update (UpdateRequest) returns (string)
+
+	@handler query
+	get /api/user/query/:id (QueryRequest) returns (string)
+}
+

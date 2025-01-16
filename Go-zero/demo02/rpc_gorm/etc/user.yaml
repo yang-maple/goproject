@@ -1,0 +1,16 @@
+Name: user.rpc
+ListenOn: 0.0.0.0:8080
+# DB
+Mysql:
+  DataSource: root:123456@tcp(10.1.131.32:3306)/my_db?charset=utf8mb4&parseTime=True&loc=Local
+
+# Consul:
+Consul:
+  Host: 10.1.131.32:8500 # consul endpoint
+  Token: '74564183-951d-27e3-493e-bb57bfbb3892' # consul ACL token (optional)
+  Key: user.addrpc # service name registered to Consul
+  Meta:
+    Protocol: grpc
+  Tag:
+    - tag
+    - rpc

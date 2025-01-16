@@ -1,0 +1,8 @@
+Name: users
+Host: 0.0.0.0
+Port: 8888
+
+# ：后面带空格
+Auth: 
+  AccessExpire: 3600
+  AccessSecret: "adsadqdqwadasda"

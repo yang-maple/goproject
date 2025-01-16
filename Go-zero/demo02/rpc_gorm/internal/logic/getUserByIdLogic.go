@@ -1,0 +1,44 @@
+package logic
+
+import (
+	"context"
+
+	"demo02/models"
+	"demo02/rpc_gorm/internal/svc"
+	"demo02/rpc_gorm/pb"
+
+	"github.com/zeromicro/go-zero/core/logx"
+)
+
+type GetUserByIdLogic struct {
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
+	logx.Logger
+}
+
+func NewGetUserByIdLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUserByIdLogic {
+	return &GetUserByIdLogic{
+		ctx:    ctx,
+		svcCtx: svcCtx,
+		Logger: logx.WithContext(ctx),
+	}
+}
+
+func (l *GetUserByIdLogic) GetUserById(in *pb.GetUserByIdReq) (*pb.GetUserByIdResp, error) {
+	// todo: add your logic here and delete this line
+
+	user := models.User{
+		Id: in.Id,
+	}
+	tx := l.svcCtx.DB.Take(&user)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return &pb.GetUserByIdResp{
+		User: &pb.User{
+			Id:       user.Id,
+			Username: user.Username,
+			Password: user.Password,
+		},
+	}, nil
+}

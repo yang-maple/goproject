@@ -1,0 +1,11 @@
+Name: users
+Host: 0.0.0.0
+Port: 8888
+
+Auth: 
+  AccessSecret: duerueudfnd235sdh
+  AccessExpire: 3600
+
+
+UserRpc: 
+  Target: consul://10.1.131.32:8500/user.demo03?wait=14s&token=74564183-951d-27e3-493e-bb57bfbb3892

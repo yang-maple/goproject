@@ -1,0 +1,33 @@
+syntax = "v1"
+
+type LoginRequest {
+	UserName string `json:"userName"`
+	Password string `json:"password"`
+}
+
+type LoginResponse {
+	Code int    `json:"code"`
+	Data string `json:"data"`
+	Msg  string `json:"msg"`
+}
+
+type UserInfo {
+	UserName string `json:"userName"`
+	Addr     string `json:"addr"`
+	Id       uint   `json:"id"`
+}
+
+type UserInfoResponse {
+	Code int      `json:"code"`
+	Data UserInfo `json:"data"`
+	Msg  string   `json:"msg"`
+}
+
+service users {
+	@handler login
+	post /api/user/login (LoginRequest) returns (LoginResponse)
+
+	@handler userInfo
+	get /api/user/userinfo returns (UserInfoResponse)
+}
+
