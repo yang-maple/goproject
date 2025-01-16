@@ -13,9 +13,10 @@ import (
 )
 
 type Data struct {
-	HostName string `json:"hostname"`
-	IP       string `json:"ip"`
-	Product  string `json:"product"`
+	HostName    string `json:"hostname"`
+	IP          string `json:"ip"`
+	Product     string `json:"product"`
+	ProductName string `json:"product_name"`
 }
 
 func main() {
@@ -30,7 +31,7 @@ func main() {
 	api := v1.NewAPI(client)
 
 	// 构建查询参数
-	query := "count by (ip,hostname) (windows_cs_hostname)\n  *\non (ip)\ngroup_left(product)\ncount by (ip, product) (windows_os_info)"
+	query := "count by (ip,product_name)(netdata_system_clock_status_status_average{dimension=\"unsync\"}==1)"
 
 	// 执行查询
 	result, warnings, err := api.Query(context.Background(), query, time.Now())
@@ -49,10 +50,9 @@ func main() {
 	datas := []Data{}
 	for _, sample := range vector {
 		modified := strings.Replace(sample.Metric.String(), "=", ":", -1)
-		modified = strings.Replace(modified, "hostname", `"hostname"`, -1)
+		//modified = strings.Replace(modified, "hostname", `"hostname"`, -1)
 		modified = strings.Replace(modified, "ip", `"ip"`, -1)
-		modified = strings.Replace(modified, "product", `"product"`, -1)
-		fmt.Println(modified)
+		modified = strings.Replace(modified, "product_name", `"product_name"`, -1)
 		var data Data
 		json.Unmarshal([]byte(modified), &data)
 		datas = append(datas, data)
@@ -76,9 +76,9 @@ func createexcel(data []Data) error {
 	sheet := f.GetSheetName(0)
 
 	// 设置表头
-	f.SetCellValue(sheet, "A1", "HostName")
-	f.SetCellValue(sheet, "B1", "IP")
-	f.SetCellValue(sheet, "C1", "Product")
+	//f.SetCellValue(sheet, "A1", "HostName")
+	f.SetCellValue(sheet, "A1", "IP")
+	f.SetCellValue(sheet, "B1", "Product_Name")
 
 	// 创建一个map，key 类型为 string (对应 group 字段),value 类型为 int (对应 Excel 表格中的行号)
 	groupOperatorMap := make(map[string]int)
@@ -90,11 +90,11 @@ func createexcel(data []Data) error {
 	for _, value := range data {
 		//判断当前 group 是否已经存在于 groupOperatorMap 中，并将 group 对应的行号存储在 idx 变量中
 		if idx, ok := groupOperatorMap[value.IP]; ok {
-			f.SetCellValue(sheet, fmt.Sprintf("C%d", idx), value.Product) //如果存在，则更新对应行的 Operator 值
+			f.SetCellValue(sheet, fmt.Sprintf("B%d", idx), value.ProductName) //如果存在，则更新对应行的 Operator 值
 		} else { //如果不存在，则插入新行
-			f.SetCellValue(sheet, fmt.Sprintf("A%d", i), value.HostName) //fmt.Sprintf("A%d", i) 根据i值生成excel单元格的值，如"A2"
-			f.SetCellValue(sheet, fmt.Sprintf("B%d", i), value.IP)
-			f.SetCellValue(sheet, fmt.Sprintf("C%d", i), value.Product)
+			//f.SetCellValue(sheet, fmt.Sprintf("A%d", i), value.HostName) //fmt.Sprintf("A%d", i) 根据i值生成excel单元格的值，如"A2"
+			f.SetCellValue(sheet, fmt.Sprintf("A%d", i), value.IP)
+			f.SetCellValue(sheet, fmt.Sprintf("B%d", i), value.ProductName)
 
 			//将当前 group 和对应的行号存储到 groupOperatorMap 中,并将行号递增
 			groupOperatorMap[value.IP] = i
@@ -103,5 +103,5 @@ func createexcel(data []Data) error {
 	}
 
 	// 保存 Excel 文件,默认存储当前目录下
-	return f.SaveAs("output.xlsx")
+	return f.SaveAs("output1.xlsx")
 }
